@@ -1,0 +1,7 @@
+load_dotenv
+selenium
+bs4
+chromedriver_binary
+pandas
+pymysql
+cryptography
