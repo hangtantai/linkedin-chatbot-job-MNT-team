@@ -1,6 +1,6 @@
 .env
 chromedriver-win64.zip
 venv/*
-downloaded_files/*
-chromedriver-win64/*
+web_scrapping/downloaded_files/*
+web_scrapping/chromedriver-win64/*
 __pycache__/*

@@ -10,8 +10,8 @@ from selenium.webdriver.chrome.options import Options
 warnings.filterwarnings("ignore")
 
 # Import necessary function
-import extract_link
-import extract_detail
+import web_scrapping.extract_link as extract_link
+import web_scrapping.extract_detail as extract_detail
 
 # Call environment
 load_dotenv()
