@@ -1,13 +1,25 @@
 from langchain_groq import ChatGroq
 import streamlit as st
 import time
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
+from streamlit_app.config.config import Config
 
+# Initialize configuration
+config = Config()
+
+# Initialize configuration
+config.initialize_session_states()
+
+# variables
+time_sleep_var = config.get_config()["time_sleep"]
+temperature_var = config.get_config()["temperature"]
+model_name_var = config.get_config()["model_name"]
 
 class ChatHandler:
-    def __init__(self, model_name: str = "llama3-70b-8192", temperature: int = 0):
+    def __init__(self, model_name: str = model_name_var, temperature: int = temperature_var):
         self.groq = ChatGroq(model_name=model_name, temperature=temperature)
-        self.time_sleep = .02
+        self.time_sleep = time_sleep_var
+
 
     def generate_response(self, messages: List[Dict[str, str]]) -> str:
         """
@@ -72,18 +84,6 @@ class ChatHandler:
         if not message or not message.strip():
             return False
         return True
-
-    def escape_message_content(self, content: str) -> str:
-        """
-        Escape special characters in message content for display
-        
-        Args:
-            content (str): Raw message content
-        
-        Returns:
-            str: Escaped content
-        """
-        return content.replace('\\', '\\\\').replace("'", "\\'").replace('\n', '\\n')
 
     @staticmethod
     def create_message(role: str, content: str) -> Dict[str, str]:

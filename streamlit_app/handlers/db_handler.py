@@ -1,8 +1,14 @@
 import os 
 from dotenv import load_dotenv
 from pymongo import MongoClient 
+from streamlit_app.config.config import Config
 load_dotenv()
 
+# Intilize configuration
+config = Config()
+config.initialize_session_states()
+default_title = config.get_config()["default_name"]
+max_word = config.get_config()["max_word"]
 
 class DBHandler:
     def __init__(self):
@@ -10,7 +16,7 @@ class DBHandler:
         self.db = self.mongo_client['chatbot']
         self.chat_collection = self.db['chat_history']
     
-    def create_chat(self, chat_id: str, messages: list = None,  title: str = "New chat") -> None:
+    def create_chat(self, chat_id: str, messages: list = None,  title: str = default_title) -> None:
         """
         Create a new chat document in the database
         
@@ -49,7 +55,23 @@ class DBHandler:
         """
         self.chat_collection.update_one(
             {"_id": chat_id},
-            {"$set": {"messages": messages}}
+            {"$push": {"messages": messages}}
+        )
+    
+    def insert_chat_message(self, chat_id: str, message: dict, title: str) -> None:
+        """
+        Insert a message into a chat document
+        
+        Args:
+            chat_id (str): The chat id
+            message (dict): The message dictionary
+        """
+        self.chat_collection.insert_one(
+            {
+                "_id": chat_id,
+                "messages": message,
+                "title": title[:max_word] + "..." if len(title) > max_word else title  # Use first message as title
+            }
         )
     
     def update_chat_title(self, chat_id: str, new_title: str) -> None:
@@ -104,4 +126,4 @@ class DBHandler:
             if len(words) < len(first_message.split()):
                 title += "..."
             return title
-        return chat.get("title", "New Chat")
+        return chat.get("title", default_title)

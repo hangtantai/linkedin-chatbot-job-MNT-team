@@ -1,16 +1,14 @@
-import os 
 import time
 import streamlit as st
 from dotenv import load_dotenv
-from pymongo import MongoClient 
 from bson.objectid import ObjectId
-from langchain_groq import ChatGroq
-from streamlit_app.handler.db_handler import DBHandler
 from streamlit_app.config.config import Config
-from streamlit_app.handler.session_handler import SessionHandler
 from streamlit_app.app.sidebar import SidebarComponent
-from streamlit_app.helper.helper_ui import escape_for_js
-from streamlit_app.helper.style_loader import StyleLoader
+from streamlit_app.handlers.db_handler import DBHandler
+from streamlit_app.handlers.chat_handler import ChatHandler 
+from streamlit_app.handlers.session_handler import SessionHandler
+from streamlit_app.helpers.processing_text import escape_for_js
+from streamlit_app.handlers.style_loader_handler import StyleLoader
 
 # Load styles and scripts
 StyleLoader.load_css([
@@ -26,9 +24,8 @@ load_dotenv()
 config = Config()
 config.initialize_session_states()
 
-# Define variables
-time_sleep = config.get_config()["time_sleep"]
-max_word = config.get_config()["max_word"]
+# Intilize chat handler
+chat_handler = ChatHandler()
 
 # Initialize DB handler
 db_handler = DBHandler()
@@ -76,11 +73,11 @@ if prompt := st.chat_input("Type your message here..."):
         # Create new chat only when first message is sent
         new_chat_id = ObjectId()
         st.session_state.chat_id = str(new_chat_id)
-        db_handler.chat_collection.insert_one({
-            "_id": new_chat_id,
-            "messages": [],
-            "title": prompt[:30] + "..." if len(prompt) > 30 else prompt  # Use first message as title
-        })
+        db_handler.insert_chat_message(
+            chat_id = new_chat_id,
+            messages = [],
+            title = prompt
+        )
 
     # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -93,50 +90,40 @@ if prompt := st.chat_input("Type your message here..."):
         
         try:
             # Create context from all previous messages
-            chat_context = []
-            for msg in st.session_state.messages[:-1]: 
-                chat_context.append({
-                    "role": msg["role"],
-                    "content": msg["content"]
-                })
+            chat_context = session_handler.process_knowledge(st.session_state)
+            
             # Add the current message
             chat_context.append({
                 "role": "user",
                 "content": prompt
             })
 
-            response = st.session_state.llm.invoke(
-                input=chat_context
-            )
+            response_content = chat_handler.generate_response(chat_context)
             
             # Stream the response
-            full_response = ""
-            for chunk in response.content.split():
-                full_response += chunk + " "
-                time.sleep(time_sleep)
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
+            chat_handler.stream_response(response_content, message_placeholder)
             
             # Add assistant response to messages
-            st.session_state.messages.append({"role": "assistant", "content": response.content})
+            st.session_state.messages.append({"role": "assistant", "content": response_content})
             
             # Update MongoDB
             current_chat_id = ObjectId(st.session_state.chat_id)
-            db_handler.chat_collection.update_one(
-                {"_id": current_chat_id},
-                {
-                    "$push": {
-                        "messages": {
-                            "$each": [
-                                {"role": "user", "content": prompt},
-                                {"role": "assistant", "content": response.content}
-                            ]
-                        }
-                    }
-                }
-            )
+            db_handler.update_chat_messages(current_chat_id, {"role": "user", "content": prompt})
+            db_handler.update_chat_messages(current_chat_id, {"role": "assistant", "content": response_content})
+            # db_handler.chat_collection.update_one(
+            #     {"_id": current_chat_id},
+            #     {
+            #         "$push": {
+            #             "messages": {
+            #                 "$each": [
+            #                     {"role": "user", "content": prompt},
+            #                     {"role": "assistant", "content": response.content}
+            #                 ]
+            #             }
+            #         }
+            #     }
+            # )
             
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
             message_placeholder.markdown("Sorry, there was an error generating the response. Please try again.")
-

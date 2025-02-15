@@ -1,8 +1,15 @@
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
-from typing import Any
 import streamlit as st
 from pymongo import MongoClient 
+from streamlit_app.config.config import Config
+from typing import Any
+
+# intilize configuration
+config = Config()
+
+# default title
+default_title = config.get_config()["default_name"]
 
 class SessionHandler:
     def __init__(self, chat_collection: Collection) -> None:
@@ -24,7 +31,7 @@ class SessionHandler:
         self.chat_collection.insert_one({
             "_id": ObjectId(self.session_state.chat_id), 
             "messages": [],
-            "title": "New Chat"
+            "title": default_title
         })
         if "selected_chat" in self.session_state:
             del self.session_state.selected_chat
@@ -84,3 +91,17 @@ class SessionHandler:
                     if st.button("Cancel", key=f"cancel_rename_{chat_id}"):
                         st.session_state.pop(f"show_rename_{chat_id}", None)
                         st.rerun()
+    def process_knowledge(self, session_state: Any) -> dict:
+        """
+        Process all previous chat messages to model
+
+        Args:
+            session_state (Any): Streamlit session state
+        """
+        chat_context = []
+        for msg in session_state.messages[:-1]: 
+            chat_context.append({
+                "role": msg["role"],
+                "content": msg["content"]
+            })
+        return chat_context

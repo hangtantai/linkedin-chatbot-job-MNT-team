@@ -6,3 +6,4 @@ web_scrapping/chromedriver-win64/*
 __pycache__/*
 streamlit_app.egg-info/*
 storage/*
+**/__pycache__/

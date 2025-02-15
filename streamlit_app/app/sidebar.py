@@ -1,10 +1,11 @@
 import streamlit as st
 from bson.objectid import ObjectId
 from typing import Callable
-
+from typing import Any
+from pymongo.collection import Collection
 class SidebarComponent:
     def __init__(self, 
-                 chat_collection,
+                 chat_collection: Collection,
                  create_new_chat: Callable,
                  switch_chat: Callable,
                  get_chat_title: Callable,
