@@ -1,0 +1,102 @@
+/* Chat history buttons */
+.stButton button {
+    width: 100%;
+    border: none;
+    outline: none;
+    background-color: #f0f0f0;
+    padding: 10px;
+    margin: 5px 0;
+    text-align: left;
+    box-shadow: none;
+    cursor: pointer;
+    color: black;
+    display: flex; 
+    justify-content: flex-start; 
+    align-items: left;
+}
+
+.stButton button:hover {
+    background-color:#e0e0e0;
+}
+
+/* Main chat container */
+.main {
+    max-width: 800px;
+    margin: auto;
+}
+
+/* Message containers */
+.stChatMessage {
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 0.5rem 0;
+}
+
+/* Chat input */
+.stChatInputContainer {
+    padding: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+        
+/* Dropdown styling */
+.stSelectbox {
+    margin-top: 7px;
+}
+        
+/* Container of the selectbox */
+.stSelectbox > div > div {
+    padding: 2px;
+    min-height: 35px;
+    border: none;
+    background: transparent;
+}
+        
+/* Hide dropdown arrow */
+.stSelectbox > div > div > div:last-child {
+    display: none;
+}
+        
+/* Remove hover background */
+.stSelectbox > div > div:hover {
+    background: transparent;
+}
+        
+/* Remove padding from columns */
+[data-testid="column"] {
+    padding: 0 !important;
+}
+        
+/* Align text input with buttons */
+.stTextInput input {
+    padding: 5px 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+/* ... existing CSS ... */
+
+    /* Copy button styling */
+    .message-container {
+        position: relative;
+    }
+    
+    .copy-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        padding: 4px 8px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        display: none;
+        transition: all 0.2s;
+    }
+    
+    .message-container:hover .copy-button {
+        display: block;
+    }
+    
+    .copy-button:hover {
+        background: #f0f0f0;
+    }
