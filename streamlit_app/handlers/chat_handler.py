@@ -1,16 +1,14 @@
 from langchain_groq import ChatGroq
 import streamlit as st
 import time
-import os
 from typing import List, Dict, Any
 from streamlit_app.config.config import Config
-from streamlit_app.helpers.load_env import load_env_file
-
+# from streamlit_app.helpers.load_env import load_env_file
 
 # Initialize configuration
 config = Config()
-load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
-
+# load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
+api_key = st.secrets["GROQ_API_KEY"]
 # Initialize configuration
 config.initialize_session_states()
 
@@ -21,7 +19,7 @@ model_name_var = config.get_config()["model_name"]
 
 class ChatHandler:
     def __init__(self, model_name: str = model_name_var, temperature: int = temperature_var):
-        self.llm = ChatGroq(api_key=os.environ["GROQ_API_KEY"], model_name=model_name, temperature=temperature)
+        self.llm = ChatGroq(api_key=api_key, model_name=model_name, temperature=temperature)
         self.time_sleep = time_sleep_var
 
 

@@ -7,3 +7,4 @@ __pycache__/*
 streamlit_app.egg-info/*
 storage/*
 **/__pycache__/
+/.streamlit/*

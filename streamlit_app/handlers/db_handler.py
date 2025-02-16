@@ -1,19 +1,20 @@
-import os 
-from dotenv import load_dotenv
+import streamlit as st
 from pymongo import MongoClient 
 from streamlit_app.config.config import Config
-from streamlit_app.helpers.load_env import load_env_file
+# from streamlit_app.helpers.load_env import load_env_file
+
 
 # Intilize configuration
 config = Config()
 config.initialize_session_states()
-load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
+# load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
+db_uri = st.secrets["MONGO_URI"]
 default_title = config.get_config()["default_name"]
 max_word = config.get_config()["max_word"]
 
 class DBHandler:
     def __init__(self):
-        self.mongo_client = MongoClient(os.environ['MONGO_URI'])
+        self.mongo_client = MongoClient(db_uri)
         self.db = self.mongo_client['chatbot']
         self.chat_collection = self.db['chat_history']
     

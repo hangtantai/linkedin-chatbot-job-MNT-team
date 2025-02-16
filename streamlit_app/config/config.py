@@ -1,10 +1,11 @@
 from langchain_groq import ChatGroq
 import streamlit as st
 import os
-from streamlit_app.helpers.load_env import load_env_file
-
-load_env_file(env_filename=".env", app_folder="streamlit_app")
-
+# from streamlit_app.helpers.load_env import load_env_file
+# from streamlit_app.helpers.load_env_secret import get_env_var
+# load_env_file(env_filename=".env", app_folder="streamlit_app")
+# api_key = get_env_var("GROQ_API_KEY")
+api_key = st.secrets["GROQ_API_KEY"]
 class Config:
     _config = {
         "time_sleep": 0.02,
@@ -24,7 +25,7 @@ class Config:
         # Model configurations
         if "llm" not in st.session_state:
             st.session_state.llm = ChatGroq(
-                api_key=os.getenv("GROQ_API_KEY"),
+                api_key=api_key,
                 temperature=cls.get_config()["temperature"], 
                 model_name=cls.get_config()["model_name"],
             )

@@ -13,7 +13,7 @@ from streamlit_app.helpers.load_env import load_env_file
 config = Config()
 config.initialize_session_states()
 
-load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
+# load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
 
 # Load styles and scripts
 StyleLoader.load_css([
