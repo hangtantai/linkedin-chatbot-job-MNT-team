@@ -8,3 +8,4 @@ cryptography
 streamlit
 langchain-groq
 pymongo
+toml
