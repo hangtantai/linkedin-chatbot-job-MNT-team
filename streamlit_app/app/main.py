@@ -2,8 +2,8 @@ import streamlit as st
 from bson.objectid import ObjectId
 import os
 import sys
-
-if "C:\\Users\\Hang Tan Tai\\AppData\\Local\\Programs\\Python\\Python311\\Lib" not in sys.path:
+print(os.getcwd())
+if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 

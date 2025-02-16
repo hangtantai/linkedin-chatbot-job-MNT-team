@@ -2,13 +2,9 @@ from langchain_groq import ChatGroq
 import streamlit as st
 import os
 import sys
-if "C:\\Users\\Hang Tan Tai\\AppData\\Local\\Programs\\Python\\Python311\\Lib" not in sys.path:
+if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
-# from streamlit_app.helpers.load_env import load_env_file
-# from streamlit_app.helpers.load_env_secret import get_env_var
-# load_env_file(env_filename=".env", app_folder="streamlit_app")
-# api_key = get_env_var("GROQ_API_KEY")
 api_key = st.secrets["GROQ_API_KEY"]
 class Config:
     _config = {
