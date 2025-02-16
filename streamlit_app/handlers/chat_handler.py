@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 import os
 import sys
 # Check if running on Streamlit Cloud
-if "/mount/src" in sys.path:
+if "C:\\Users\\Hang Tan Tai\\AppData\\Local\\Programs\\Python\\Python311\\Lib" not in sys.path:
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 

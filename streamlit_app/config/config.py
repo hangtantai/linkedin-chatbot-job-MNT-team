@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 import streamlit as st
 import os
 import sys
-if "/mount/src" in sys.path:
+if "C:\\Users\\Hang Tan Tai\\AppData\\Local\\Programs\\Python\\Python311\\Lib" not in sys.path:
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 # from streamlit_app.helpers.load_env import load_env_file
