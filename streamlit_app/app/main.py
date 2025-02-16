@@ -1,5 +1,14 @@
 import streamlit as st
 from bson.objectid import ObjectId
+import os
+import sys
+# Check if running on Streamlit Cloud
+IS_STREAMLIT_CLOUD = os.getenv('SERVER_SOFTWARE', '').startswith('streamlit')
+
+if IS_STREAMLIT_CLOUD:
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+
 from streamlit_app.config.config import Config
 from streamlit_app.app.sidebar import SidebarComponent
 from streamlit_app.handlers.db_handler import DBHandler

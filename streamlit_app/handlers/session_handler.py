@@ -1,6 +1,15 @@
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
 import streamlit as st
+import os
+import sys
+# Check if running on Streamlit Cloud
+IS_STREAMLIT_CLOUD = os.getenv('SERVER_SOFTWARE', '').startswith('streamlit')
+
+if IS_STREAMLIT_CLOUD:
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 from pymongo import MongoClient 
 from streamlit_app.config.config import Config
 from typing import Any

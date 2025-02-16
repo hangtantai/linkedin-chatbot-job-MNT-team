@@ -2,6 +2,15 @@ from langchain_groq import ChatGroq
 import streamlit as st
 import time
 from typing import List, Dict, Any
+import os
+import sys
+# Check if running on Streamlit Cloud
+IS_STREAMLIT_CLOUD = os.getenv('SERVER_SOFTWARE', '').startswith('streamlit')
+
+if IS_STREAMLIT_CLOUD:
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+
 from streamlit_app.config.config import Config
 # from streamlit_app.helpers.load_env import load_env_file
 
