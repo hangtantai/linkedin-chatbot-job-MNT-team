@@ -2,8 +2,9 @@ from langchain_groq import ChatGroq
 import streamlit as st
 import os
 import sys
-os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
-sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+if "/mount/src" in sys.path:
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 # from streamlit_app.helpers.load_env import load_env_file
 # from streamlit_app.helpers.load_env_secret import get_env_var
 # load_env_file(env_filename=".env", app_folder="streamlit_app")

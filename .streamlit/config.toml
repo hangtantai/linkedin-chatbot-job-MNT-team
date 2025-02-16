@@ -2,10 +2,6 @@
 enableCORS = true
 enableXsrfProtection = false
 
-[runner]
-# This tells Streamlit Cloud where to find the package
-pythonPath = "/mount/src/linkedin-chatbot-job-mnt-team"
-
 [browser]
-serverAddress = "0.0.0.0"
+serverAddress = "localhost"
 serverPort = 8501

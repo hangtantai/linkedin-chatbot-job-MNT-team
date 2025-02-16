@@ -5,9 +5,9 @@ import os
 import sys
 # Check if running on Streamlit Cloud
 
-os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
-sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
-sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+if "/mount/src" in sys.path:
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 from pymongo import MongoClient 
 from streamlit_app.config.config import Config
 from typing import Any

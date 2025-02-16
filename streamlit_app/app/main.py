@@ -3,8 +3,9 @@ from bson.objectid import ObjectId
 import os
 import sys
 
-os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
-sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+if "/mount/src" in sys.path:
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 
 from streamlit_app.config.config import Config
 from streamlit_app.app.sidebar import SidebarComponent
