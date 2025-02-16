@@ -17,8 +17,6 @@ COPY streamlit_app/ ./streamlit_app/
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
-ARG GROQ_API_KEY
-ENV GROQ_API_KEY=$GROQ_API_KEY
 
 # Expose port
 EXPOSE 8501

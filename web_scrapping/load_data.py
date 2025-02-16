@@ -1,9 +1,9 @@
 # import necessary library
 import pandas as pd
 import pymysql
-from dotenv import load_dotenv
 import os
-load_dotenv()
+from web_scrapping.load_env import load_env_file
+load_env_file(env_filename=".env", app_folder="web_scrapping")
 
 # define variables
 file_name = "job_data.csv"

@@ -1,6 +1,4 @@
-import time
 import streamlit as st
-from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from streamlit_app.config.config import Config
 from streamlit_app.app.sidebar import SidebarComponent
@@ -9,20 +7,21 @@ from streamlit_app.handlers.chat_handler import ChatHandler
 from streamlit_app.handlers.session_handler import SessionHandler
 from streamlit_app.helpers.processing_text import escape_for_js
 from streamlit_app.handlers.style_loader_handler import StyleLoader
-
-# Load styles and scripts
-StyleLoader.load_css([
-    'streamlit_app/static/styles.css',
-])
-StyleLoader.load_js([
-    'streamlit_app/static/scripts.js'
-])
-
-load_dotenv()
+from streamlit_app.helpers.load_env import load_env_file
 
 # Initialize configuration
 config = Config()
 config.initialize_session_states()
+
+load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
+
+# Load styles and scripts
+StyleLoader.load_css([
+    config.get_config()["folder_css"],
+])
+StyleLoader.load_js([
+   config.get_config()["folder_js"],
+])
 
 # Intilize chat handler
 chat_handler = ChatHandler()

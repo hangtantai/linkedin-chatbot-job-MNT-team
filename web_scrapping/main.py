@@ -4,9 +4,9 @@ import warnings
 import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
+from web_scrapping.load_env import load_env_file
 warnings.filterwarnings("ignore")
 
 # Import necessary function
@@ -14,7 +14,7 @@ import web_scrapping.extract_link as extract_link
 import web_scrapping.extract_detail as extract_detail
 
 # Call environment
-load_dotenv()
+load_env_file(env_filename=".env", app_folder="web_scrapping")
 
 # Get username and password to Linkedin
 email = os.environ["EMAIL"]

@@ -2,11 +2,12 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient 
 from streamlit_app.config.config import Config
-load_dotenv()
+from streamlit_app.helpers.load_env import load_env_file
 
 # Intilize configuration
 config = Config()
 config.initialize_session_states()
+load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
 default_title = config.get_config()["default_name"]
 max_word = config.get_config()["max_word"]
 
