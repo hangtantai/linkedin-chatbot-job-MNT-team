@@ -1,7 +1,6 @@
 import streamlit as st
 from bson.objectid import ObjectId
 from typing import Callable
-from typing import Any
 from pymongo.collection import Collection
 class SidebarComponent:
     def __init__(self, 

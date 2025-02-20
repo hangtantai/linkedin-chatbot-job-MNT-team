@@ -9,3 +9,9 @@ streamlit
 langchain-groq
 pymongo
 toml
+tiktoken
+langchain-core 
+langgraph>0.2.27
+langchain-groq
+langchain-huggingface
+faiss-cpu

@@ -1,7 +1,7 @@
 import os
 import toml
 from pathlib import Path
-from typing import Dict, Any, Optional, Union
+from typing import Optional
 
 def get_env_var(key: str, secrets_path: Optional[str] = None) -> Optional[str]:
     """

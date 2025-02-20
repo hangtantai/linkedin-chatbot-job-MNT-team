@@ -9,8 +9,6 @@ if "mnt" in os.getcwd():
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 
 from streamlit_app.config.config import Config
-# from streamlit_app.helpers.load_env import load_env_file
-
 
 # Intilize configuration
 config = Config()

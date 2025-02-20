@@ -2,7 +2,6 @@ import streamlit as st
 from bson.objectid import ObjectId
 import os
 import sys
-print(os.getcwd())
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
@@ -14,8 +13,6 @@ from streamlit_app.handlers.chat_handler import ChatHandler
 from streamlit_app.handlers.session_handler import SessionHandler
 from streamlit_app.helpers.processing_text import escape_for_js
 from streamlit_app.handlers.style_loader_handler import StyleLoader
-from streamlit_app.helpers.load_env import load_env_file
-
 # Initialize configuration
 config = Config()
 config.initialize_session_states()
@@ -96,15 +93,19 @@ if prompt := st.chat_input("Type your message here..."):
         
         try:
             # Create context from all previous messages
-            chat_context = session_handler.process_knowledge(st.session_state)
+            # chat_context = session_handler.process_knowledge(st.session_state)
             
             # Add the current message
-            chat_context.append({
-                "role": "user",
-                "content": prompt
-            })
+            # chat_context.append({
+            #     "role": "user",
+            #     "content": prompt
+            # })
+            # get all user messages and the last 3 assistant messages
+            # final_chat_context = chat_handler.filter_messages(chat_context)
 
-            response_content = chat_handler.generate_response(chat_context)
+            # generate response
+            response_content = chat_handler.retrieve_qa(prompt)
+            # response_content = chat_handler.generate_response(final_chat_context)
             
             # Stream the response
             chat_handler.stream_response(response_content, message_placeholder)
@@ -116,19 +117,7 @@ if prompt := st.chat_input("Type your message here..."):
             current_chat_id = ObjectId(st.session_state.chat_id)
             db_handler.update_chat_messages(current_chat_id, {"role": "user", "content": prompt})
             db_handler.update_chat_messages(current_chat_id, {"role": "assistant", "content": response_content})
-            # db_handler.chat_collection.update_one(
-            #     {"_id": current_chat_id},
-            #     {
-            #         "$push": {
-            #             "messages": {
-            #                 "$each": [
-            #                     {"role": "user", "content": prompt},
-            #                     {"role": "assistant", "content": response.content}
-            #                 ]
-            #             }
-            #         }
-            #     }
-            # )
+
             
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")

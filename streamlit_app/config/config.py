@@ -2,6 +2,7 @@ from langchain_groq import ChatGroq
 import streamlit as st
 import os
 import sys
+import pymysql
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
@@ -17,6 +18,23 @@ class Config:
         "app_folder": "streamlit_app",
         "folder_css": "streamlit_app/static/styles.css",
         "folder_js": "streamlit_app/static/scripts.js",
+        "max_tokens": 1500,
+        "assistant_message_row": 3,
+        "defaul_model_token": "cl100k_base",
+        "DB_config": {
+                "host": st.secrets["HOST_AIVEN"],
+                "user": st.secrets["USER_AIVEN"],
+                "password": st.secrets["PASSWORD_AIVEN"],
+                "db": st.secrets["DB_AIVEN"],
+                "port": int(st.secrets["PORT_AIVEN"]),
+                "charset": "utf8mb4",
+                "cursorclass": pymysql.cursors.DictCursor,
+                "connect_timeout": 10,
+                "read_timeout": 10,
+                "write_timeout": 10,
+            },
+        "table_name": st.secrets["TABLE_AIVEN"],
+        "vector_db_path": "streamlit_app/models/vector_db",
     }
 
     @classmethod
