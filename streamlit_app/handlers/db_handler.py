@@ -3,17 +3,17 @@ from pymongo import MongoClient
 import os
 import sys
 # Check if running on Streamlit Cloud
-
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 
-from streamlit_app.config.config import Config
+from streamlit_app.utils.config import Config
 
 # Intilize configuration
 config = Config()
 config.initialize_session_states()
-# load_env_file(env_filename=config.get_config()["env_filename"], app_folder=config.get_config()["app_folder"])
+
+# Variables
 db_uri = st.secrets["MONGO_URI"]
 default_title = config.get_config()["default_name"]
 max_word = config.get_config()["max_word"]
@@ -66,7 +66,7 @@ class DBHandler:
             {"$push": {"messages": messages}}
         )
     
-    def insert_chat_message(self, chat_id: str, message: dict, title: str) -> None:
+    def insert_chat_message(self, chat_id: str, messages: dict, title: str) -> None:
         """
         Insert a message into a chat document
         
@@ -77,7 +77,7 @@ class DBHandler:
         self.chat_collection.insert_one(
             {
                 "_id": chat_id,
-                "messages": message,
+                "messages": messages,
                 "title": title[:max_word] + "..." if len(title) > max_word else title  # Use first message as title
             }
         )

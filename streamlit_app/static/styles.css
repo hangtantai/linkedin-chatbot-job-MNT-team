@@ -75,28 +75,29 @@
 
 /* ... existing CSS ... */
 
-    /* Copy button styling */
-    .message-container {
-        position: relative;
-    }
-    
-    .copy-button {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        padding: 4px 8px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        cursor: pointer;
-        display: none;
-        transition: all 0.2s;
-    }
-    
-    .message-container:hover .copy-button {
-        display: block;
-    }
-    
-    .copy-button:hover {
-        background: #f0f0f0;
-    }
+/* Copy button styling */
+.message-container {
+    position: relative;
+}
+
+.copy-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    display: none;
+    transition: all 0.2s;
+}
+
+.message-container:hover .copy-button {
+    display: block;
+}
+
+.copy-button:hover {
+    background: #f0f0f0;
+}
+

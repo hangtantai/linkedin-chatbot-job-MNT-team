@@ -6,19 +6,15 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from web_scrapping.load_env import load_env_file
 warnings.filterwarnings("ignore")
-
+import streamlit as st
 # Import necessary function
 import web_scrapping.extract_link as extract_link
 import web_scrapping.extract_detail as extract_detail
 
-# Call environment
-load_env_file(env_filename=".env", app_folder="web_scrapping")
-
 # Get username and password to Linkedin
-email = os.environ["EMAIL"]
-password = os.environ["PASSWORD"]
+email = st.secrets["EMAIL"]
+password = st.secrets["PASSWORD"]
 
 # driver
 chrome_options = Options()
@@ -79,3 +75,6 @@ for i in link_extracted:
 
 print("Successfully, all done")
 data.to_csv("job_data.csv", index=False)
+
+
+# cloud -> not localhost

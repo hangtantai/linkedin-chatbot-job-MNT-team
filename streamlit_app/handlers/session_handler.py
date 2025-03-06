@@ -9,7 +9,7 @@ if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 from pymongo import MongoClient 
-from streamlit_app.config.config import Config
+from streamlit_app.utils.config import Config
 from typing import Any
 
 # intilize configuration

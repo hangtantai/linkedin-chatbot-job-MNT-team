@@ -6,12 +6,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 # Embeddings
 # from langchain_community.embeddings import TensorflowHubEmbeddings
 from langchain_huggingface import HuggingFaceEmbeddings
-from streamlit_app.models.db_connection import Database
+from streamlit_app.db.db_connection import Database
 # Vector Store
 from langchain_community.vectorstores import FAISS
 # QNA
 from langchain.chains import RetrievalQA
-from streamlit_app.config.config import Config
+from streamlit_app.utils.config import Config
 import os
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"

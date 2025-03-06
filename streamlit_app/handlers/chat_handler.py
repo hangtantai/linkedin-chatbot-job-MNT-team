@@ -6,13 +6,15 @@ import os
 import sys
 import tiktoken
 from langchain.chains import RetrievalQA
+import threading
 
 # Check if running on Streamlit Cloud
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 
-from streamlit_app.config.config import Config
+from streamlit_app.utils.config import Config
+from streamlit_app.utils.utils_chat import check_token_limit
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
@@ -23,7 +25,7 @@ api_key = st.secrets["GROQ_API_KEY"]
 # Initialize configuration
 config.initialize_session_states()
 
-# variables
+# Variables
 time_sleep_var = config.get_config()["time_sleep"]
 temperature_var = config.get_config()["temperature"]
 model_name_var = config.get_config()["model_name"]
@@ -33,20 +35,53 @@ defaul_model_token = config.get_config()["defaul_model_token"]
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
-
 class ChatHandler:
+    _embeddings = None
+    _vector_db = None
+    _is_initialized = False
+    _initialization_lock = threading.Lock()
+
     def __init__(self, model_name: str = model_name_var, temperature: int = temperature_var):
         self.llm = ChatGroq(api_key=api_key, model_name=model_name, temperature=temperature, max_tokens=max_tokens_var)
         self.time_sleep = time_sleep_var
         self.max_tokens = max_tokens_var
         self.encoding = tiktoken.get_encoding(defaul_model_token)
-        # Initialize vector store components
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            cache_folder="streamlit_app/models/vector_db/" # Cache embeddings locally
-        )
-        self.vector_db = self._load_vector_store()
-        self.retriever = self.vector_db.as_retriever(search_kwargs={"k": 3})
+
+        # Set initialization flags
+        self.is_ready = False
+        
+        # Start background initialization
+        threading.Thread(target=self._initialize_in_background, daemon=True).start()
+
+    def _initialize_in_background(self):
+        """Initialize embeddings and vector database in a background thread"""
+        try:
+            with ChatHandler._initialization_lock:
+                if not ChatHandler._is_initialized:
+                    # Load embeddings
+                    if ChatHandler._embeddings is None:
+                        print("Loading embeddings model...")
+                        ChatHandler._embeddings = HuggingFaceEmbeddings(
+                            model_name="sentence-transformers/all-MiniLM-L6-v2",
+                            cache_folder="streamlit_app/models/vector_db/"
+                        )
+                    
+                    # Load vector store
+                    if ChatHandler._vector_db is None:
+                        print("Loading vector database...")
+                        ChatHandler._vector_db = self._load_vector_store()
+                    
+                    ChatHandler._is_initialized = True
+                    print("ChatHandler initialization complete!")
+                
+                # Set instance variables
+                self.embeddings = ChatHandler._embeddings
+                self.vector_db = ChatHandler._vector_db
+                self.retriever = None if self.vector_db is None else self.vector_db.as_retriever(search_kwargs={"k": 3})
+                self.is_ready = True
+        except Exception as e:
+            print(f"Error during initialization: {e}")
+            self.is_ready = True
 
     def _load_vector_store(self) -> Optional[FAISS]:
         """Initialize and load FAISS vector store"""
@@ -55,7 +90,7 @@ class ChatHandler:
             index_faiss_path = os.path.join(vector_db_path, "index.faiss")
             index_pkl_path = os.path.join(vector_db_path, "index.pkl")
 
-            # Kiểm tra xem cả hai file có tồn tại không
+            # check 2 files exist
             if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
                 print("Vector database files not found! Please generate them first.")
                 return None
@@ -64,7 +99,7 @@ class ChatHandler:
 
             vector_db = FAISS.load_local(
                 folder_path=vector_db_path,
-                embeddings=self.embeddings,
+                embeddings=self._embeddings,
                 allow_dangerous_deserialization=True
             )
             return vector_db
@@ -72,7 +107,6 @@ class ChatHandler:
             print(f"Error loading FAISS: {e}")
             return None
         
-
     def retrieve_qa(self, query) -> str:
         """
         Use the retriever to run a question-answering chain based on retrieved documents.
@@ -129,32 +163,6 @@ class ChatHandler:
             st.error(f"Error filtering messages: {str(e)}")
             return []
     
-    def count_tokens(self, text: str) -> int:
-        """
-        Count the number of tokens in a message
-        
-        Args:
-            message (str): Input message
-        
-        Returns:
-            int: Number of tokens
-        """
-        return len(self.encoding.encode(text))
-
-    def check_token_limit(self, messages: List[Dict[str, str]]) -> bool:
-        """
-        Check if the combined messages exceed token limit
-        
-        Args:
-            messages (List[Dict[str, str]]): List of message dictionaries
-            
-        Returns:
-            bool: True if within limit, False if exceeds
-        """
-        total_tokens = sum(self.count_tokens(msg["content"]) for msg in messages)
-
-        return total_tokens <= self.max_tokens
-    
     def generate_response(self, messages: List[Dict[str, str]]) -> str:
         """
         Generate response using the chat model
@@ -166,7 +174,7 @@ class ChatHandler:
             str: Generated response
         """
         try:
-            if not self.check_token_limit(messages):
+            if not check_token_limit(max_tokens_var, self.encoding, messages):
                 st.error(f"Message length exceeds token limit of {self.max_tokens}")
                 return None
             
@@ -193,52 +201,3 @@ class ChatHandler:
             time.sleep(self.time_sleep)
             placeholder.markdown(full_response + "▌")
         placeholder.markdown(full_response)
-    
-    def format_messages_for_model(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
-        """
-        Format messages for model input
-        
-        Args:
-            messages (List[Dict[str, str]]): Raw messages from chat history
-        
-        Returns:
-            List[Dict[str, str]]: Formatted messages for model
-        """
-        return [
-            {
-                "role": msg["role"],
-                "content": msg["content"]
-            }
-            for msg in messages
-        ]
-
-    def validate_message(self, message: str) -> bool:
-        """
-        Validate user message
-        
-        Args:
-            message (str): User input message
-        
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        if not message or not message.strip():
-            return False
-        return True
-
-    @staticmethod
-    def create_message(role: str, content: str) -> Dict[str, str]:
-        """
-        Create a message dictionary
-        
-        Args:
-            role (str): Message role (user/assistant)
-            content (str): Message content
-        
-        Returns:
-            Dict[str, str]: Formatted message dictionary
-        """
-        return {
-            "role": role,
-            "content": content
-        }

@@ -85,14 +85,6 @@ def extract_detail_information(file_name: str) -> pd.DataFrame:
         job_details = details_cotainer_div.get_text(separator='\n', strip=True)
         job_data["job_details"] = job_details
 
-    # get more information about the company
-    # company_container = main_container.find("div", class_="jobs-company__box")
-    # if company_container:
-    #     company_container_p = company_container.find("p", class_="jobs-company__company-description text-body-small-open")
-    #     if company_container_p:
-    #         job_company_detail = company_container_p.get_text(separator='\n', strip=True)
-    #         job_data["job_company_detail"] = job_company_detail
-
     # convert dictionary to data frame
     job_df = pd.DataFrame([job_data])
     print("Successfully: extracted information")
