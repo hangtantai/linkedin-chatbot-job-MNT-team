@@ -92,6 +92,10 @@ print("Sentence embeddings:")
 print(sentence_embeddings)
 ```
 
+## Evaluation Results
+
+For an automated evaluation of this model, see the *Sentence Embeddings Benchmark*: [https://seb.sbert.net](https://seb.sbert.net?model_name=sentence-transformers/all-MiniLM-L6-v2)
+
 ------
 
 ## Background
