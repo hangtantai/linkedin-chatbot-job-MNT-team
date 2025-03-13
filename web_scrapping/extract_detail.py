@@ -1,6 +1,9 @@
 # import library if not import
 from bs4 import BeautifulSoup
 import pandas as pd
+from web_scrapping.logger import Logger
+
+logger = Logger()
 def extract_detail_information(file_name: str) -> pd.DataFrame:
     """
     Extracts detailed job information from HTML content and updates the provided DataFrame
@@ -12,80 +15,127 @@ def extract_detail_information(file_name: str) -> pd.DataFrame:
     Returns:
         pd.DataFrame: the update DataFrame with extracted information
     """
-    # read content from file
-    with open(file_name, "r", encoding="utf-8") as file:
-        content = file.read()
-
-    # convert text to Soup
-    soup = BeautifulSoup(content, "html.parser")
+    # initialize job data
     job_data = {}
 
-    # Direction:
-    # h1 -> name
-    # location -> div.job-details-jobs-unified-top-card__primary-description-container div first span
-    # role: button.job-details-preferences-and-skills get all information from span.white-space-pre
-    # details: article class: jobs-description__container jobs-description__container--condensed div lass mt4 get all content
+    # read content from file
+    try:
+        with open(file_name, "r", encoding="utf-8") as file:
+            content = file.read()
+            logger.info(f"Successfully read file: {file_name}")
+    except (FileNotFoundError, IOError) as e:
+        logger.error(f"Error reading file: {file_name}")
+        print(f"File {file_name} not found.")
+        return pd.DataFrame()
 
-    # main container
-    main_container = soup.find("main")
+    try:
+        # Direction:
+        # h1 -> name
+        # location -> div.job-details-jobs-unified-top-card__primary-description-container div first span
+        # role: button.job-details-preferences-and-skills get all information from span.white-space-pre
+        # details: article class: jobs-description__container jobs-description__container--condensed div lass mt4 get all content
 
-    # get title of job
-    job_title = main_container.find("h1").get_text().strip()
-    job_data["job_title"] = job_title
 
-    # get location, time, applicants
-    location_time_appli_container = main_container.find("div", class_="job-details-jobs-unified-top-card__primary-description-container")
+        # convert text to Soup
+        soup = BeautifulSoup(content, "html.parser")
 
-    # extract location, time, applicants
-    if location_time_appli_container:
-        extracted = location_time_appli_container.get_text(separator=' ', strip=True)
-        splitted_element = extracted.split("·")
-        job_location = splitted_element[0]
-        job_time_posted = splitted_element[1]
-        job_applicants_applied = splitted_element[2]
-    else:
-        print("Job Location, Time and Applicants not found.")
-    # save into database
-    job_data["job_location"] = job_location
-    job_data["job_time_posted"] = job_time_posted
-    job_data["job_applicants_applied"] = job_applicants_applied
+        # main container
+        main_container = soup.find("main")
+        if not main_container:
+            logger.warning("Main container not found in HTML")
+            return pd.DataFrame()
 
-    # get role of job
-    role_container = main_container.find("button", class_="job-details-preferences-and-skills")
-    role_container_span = role_container.find_all("span")
+        try:
+            # get title of job
+            job_title = main_container.find("h1").get_text().strip()
+            job_data["job_title"] = job_title
+        except AttributeError as e:
+            logger.error(f"Failed to extract job title with problem: {str(e)}")
+            job_data["job_title"] = None
 
-    # create list to save
-    role_list = []
 
-    # iter all elements in role container
-    for ele in role_container_span:
-        if ele:
-            # exclude visually-hidden class, because it is not necessary
-            if 'visually-hidden' not in ele.get('class', []):
-                role = ele.get_text(separator=' ', strip=True)
-                # avoiding duplicate data
-                if "Matches" not in role:
-                    role_list.append(role)
-        else:
-            print("Job location container not found.")
+        # get location, time, applicants
+        try:
+            location_time_appli_container = main_container.find("div", class_="job-details-jobs-unified-top-card__primary-description-container")
 
-    # delete empty data
-    role_list = [role for role in role_list if role]
+            # extract location, time, applicants
+            if location_time_appli_container:
+                extracted = location_time_appli_container.get_text(separator=' ', strip=True)
+                splitted_element = extracted.split("·")
+                
+                # save it
+                job_data.update({
+                    "job_location": splitted_element[0].strip(),
+                    "job_time_posted": splitted_element[1].strip(),
+                    "job_applicants_applied": splitted_element[2].strip()
+                })
+                logger.info(f"Successfully extracted location/time/applicants info")
+            
+            else:
+                logger.warning(f"Location/Time/Container container not found")
+                job_data.update({
+                    "job_location": None,
+                    "job_time_posted": None,
+                    "job_applicants_applied": None
+                })
 
-    # join 2 elements
-    job_role = ",".join(role_list)
-    job_data["job_role"] = job_role
+        except Exception as e:
+            logger.error(f"Error extracting location/time/applicants: {str(e)}")
+            job_data.update({
+                "job_location": None,
+                "job_time_posted": None,
+                "job_applicants_applied": None
+            })
 
-    # detail information of the job
-    details_container = main_container.find("article", class_="jobs-description__container jobs-description__container--condensed")
+        # get role of job
+        try:
+            # create list to save
+            role_list = []
+            
+            role_container = main_container.find("button", class_="job-details-preferences-and-skills")
+            if role_container:
+                role_container_span = role_container.find_all("span")
+                # iter all elements in role container
+                for ele in role_container_span:
+                    if ele:
+                        # exclude visually-hidden class, because it is not necessary
+                        if 'visually-hidden' not in ele.get('class', []):
+                            role = ele.get_text(separator=' ', strip=True)
+                            # avoiding duplicate data
+                            if role and "Matches" not in role:
+                                role_list.append(role)
 
-    # main container of this process
-    details_cotainer_div = details_container.find("div", class_="mt4")
-    if details_cotainer_div:
-        job_details = details_cotainer_div.get_text(separator='\n', strip=True)
-        job_data["job_details"] = job_details
+                # join 2 elements
+                job_data["job_role"] = ",".join(role_list) if role_list else None
+                logger.info(f"Successful extracted job role")
+            else:
+                logger.warning(f"Role container not found")
+        except Exception as e:
+            logger.error(f"Error extracting job role: {str(e)}")
+            job_data["job_role"] = None
 
-    # convert dictionary to data frame
-    job_df = pd.DataFrame([job_data])
-    print("Successfully: extracted information")
-    return job_df
+        try:
+            # detail information of the job
+            details_container = main_container.find("article", class_="jobs-description__container jobs-description__container--condensed")
+            if details_container:
+                # main container of this process
+                details_cotainer_div = details_container.find("div", class_="mt4")
+                if details_cotainer_div:
+                    job_data["job_details"]  = details_cotainer_div.get_text(separator='\n', strip=True)
+                    logger.info(f"Successfully extracted detail information of the job")
+            else:
+                logger.warning(f"Detail information not found")
+                job_data["job_details"] = None
+        except Exception as e:
+            logger.error(f"Error extracting detail information of the job with the problem: {str(e)}")
+            job_data["job_details"] = None
+
+        # convert dictionary to data frame
+        job_df = pd.DataFrame([job_data])
+        logger.info("Successfully created DataFrame with job information")
+        return job_df
+
+    except Exception as e:
+        logger.error(f"Critical error in extraction detail information from html with problem: {str(e)}")
+        return pd.DataFrame()
+    

@@ -1,0 +1,14 @@
+from web_scrapping.s3_helpers import S3Helper
+import streamlit as st
+import os
+
+bucket_name = st.secrets["S3_BUCKET"]
+s3_helper = S3Helper(bucket_name)
+
+# Test upload
+link_file = os.path.join(os.path.dirname(__file__), 'output.txt')
+s3_helper.upload_file(link_file, "test.txt")
+
+# Test read
+content = s3_helper.read_file("test.txt")
+print(content)
