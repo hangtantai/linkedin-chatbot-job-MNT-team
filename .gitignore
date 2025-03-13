@@ -16,6 +16,7 @@ streamlit_app/logs/*
 web_scrapping/logs/*
 web_scrapping.egg-info/*
 web_scrapping/downloaded_files/*
-streamlit_app/db/vector_db/*
+streamlit_app/db/vector_db/**
 streamlit_app/db/vector_db/index.faiss
 streamlit_app/db/vector_db/index.pkl
+streamlit_app/db/vector_db/models--sentence-transformers--all-MiniLM-L6-v2/*
