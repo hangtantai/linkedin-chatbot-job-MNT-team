@@ -2,7 +2,9 @@ import os
 import boto3
 from typing import Optional
 from botocore.exceptions import ClientError
-from web_scrapping.logger import logger
+from web_scrapping.utils.logger import logger
+import streamlit as st
+from web_scrapping.utils.config import Config
 class S3Helper:
     # Singleton pattern instance storage
     _instance = None
@@ -10,6 +12,15 @@ class S3Helper:
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+        return cls._instance
+
+    @classmethod
+    def get_instance(cls, bucket_name: str = None):
+        """Get or create the singleton instance of S3Helper"""
+        if cls._instance is None:
+            cls._instance = S3Helper(bucket_name)
+        elif bucket_name and cls._instance.bucket_name != bucket_name:
+            cls._instance.bucket_name = bucket_name
         return cls._instance
 
     def __init__(self, bucket_name: str = None):
@@ -70,4 +81,5 @@ class S3Helper:
             logger.error(f"Unexpected error during S3 read: {str(e)}")
             return None
 # Create singleton instance
-s3_helper = S3Helper()
+config = Config.get_config()
+s3_helper = S3Helper.get_instance(config["s3_bucket"])
