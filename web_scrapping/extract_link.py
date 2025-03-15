@@ -1,8 +1,7 @@
 # import library if not import
 from bs4 import BeautifulSoup
-from web_scrapping.logger import Logger
+from web_scrapping.logger import logger
 
-logger = Logger()
 def extract_link(file_name: str, data: dict = None) -> dict:
     """
     Extracts link to detailed job

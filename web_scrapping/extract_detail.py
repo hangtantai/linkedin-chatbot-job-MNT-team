@@ -1,9 +1,8 @@
 # import library if not import
-from bs4 import BeautifulSoup
 import pandas as pd
-from web_scrapping.logger import Logger
+from bs4 import BeautifulSoup
+from web_scrapping.logger import logger
 
-logger = Logger()
 def extract_detail_information(file_name: str) -> pd.DataFrame:
     """
     Extracts detailed job information from HTML content and updates the provided DataFrame
@@ -49,11 +48,25 @@ def extract_detail_information(file_name: str) -> pd.DataFrame:
             # get title of job
             job_title = main_container.find("h1").get_text().strip()
             job_data["job_title"] = job_title
+            logger.info(f"Successfully extracted job title info")
         except AttributeError as e:
             logger.error(f"Failed to extract job title with problem: {str(e)}")
             job_data["job_title"] = None
 
+        # get company name
+        try:
+            company_name_container = main_container.find("div", class_="job-details-jobs-unified-top-card__company-name")
 
+            if company_name_container:
+                company_link = company_name_container.find("a")
+                company_name = company_link.get_text(strip=True) if company_link else None
+                job_data["company_name"] = company_name
+                logger.info(f"Successfully extracted company name info")
+
+        except Exception as e:
+            logger.error(f"Failed to extract company name with problem: {str(e)}")
+            job_data["company_name"] = None
+        
         # get location, time, applicants
         try:
             location_time_appli_container = main_container.find("div", class_="job-details-jobs-unified-top-card__primary-description-container")

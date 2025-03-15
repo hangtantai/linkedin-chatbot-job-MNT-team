@@ -12,11 +12,8 @@ import streamlit as st
 # Import necessary functions
 from web_scrapping.extract_link import extract_link
 from web_scrapping.extract_detail import extract_detail_information
-from web_scrapping.logger import Logger
-from web_scrapping.s3_helpers import S3Helper
-
-# initialize logger
-logger = Logger()
+from web_scrapping.logger import logger
+from web_scrapping.s3_helpers import s3_helper
 
 def setup_chrome_driver() -> webdriver.Chrome:
     """Setup and return Chrome Driver with appropriate options"""
@@ -141,7 +138,6 @@ def main():
             logger.info("Successfully saved job data to CSV")
 
             # Upload to s3
-            s3_helper = S3Helper(st.secrets["S3_BUCKET"])
             if s3_helper.upload_file(final_directory, "job_data.csv"):
                 logger.info("Successfully uploaded job data to S3")
             else:

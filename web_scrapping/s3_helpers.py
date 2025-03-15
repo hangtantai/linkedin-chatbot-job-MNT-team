@@ -1,16 +1,27 @@
-import boto3
 import os
-from botocore.exceptions import ClientError
+import boto3
 from typing import Optional
-from web_scrapping.logger import Logger
-
-logger = Logger()
-
+from botocore.exceptions import ClientError
+from web_scrapping.logger import logger
 class S3Helper:
-    def __init__(self, bucket_name: str):
+    # Singleton pattern instance storage
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, bucket_name: str = None):
         """Initialize S3 client and bucket name"""
-        self.s3_client = boto3.client('s3')
-        self.bucket_name = bucket_name
+        # Lazy initialization - only set up once
+        if not hasattr(self, "s3_client") or (bucket_name and self.bucket_name != bucket_name):
+            self.s3_client = boto3.client('s3')
+            # Only update bucket_name if provided and different from current
+            if bucket_name:
+                self.bucket_name = bucket_name
+            elif not hasattr(self, "bucket_name"):
+                self.bucket_name = None
 
     def upload_file(self, file_path: str, s3_key: Optional[str] = None) -> bool:
         """
@@ -58,3 +69,5 @@ class S3Helper:
         except Exception as e:
             logger.error(f"Unexpected error during S3 read: {str(e)}")
             return None
+# Create singleton instance
+s3_helper = S3Helper()
