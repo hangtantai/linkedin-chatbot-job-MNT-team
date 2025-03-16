@@ -1,5 +1,0 @@
-2025-03-16 12:13:31,940 - linkedin_scapper - INFO - Chrome Driver initialized successfully
-2025-03-16 12:13:39,206 - linkedin_scapper - INFO - Successfully logged into LinkedIn
-2025-03-16 12:13:42,827 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
-2025-03-16 12:13:44,557 - linkedin_scapper - INFO - Found 3 pages total
-2025-03-16 12:13:45,722 - linkedin_scapper - INFO - Successfully navigated to page 2

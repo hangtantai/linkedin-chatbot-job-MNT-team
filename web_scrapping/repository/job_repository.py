@@ -1,10 +1,9 @@
-import pandas as pd
 from web_scrapping.utils.logger import logger
 
 class JobRepository:
     """Repository for job data persistence operations"""
     
-    def __init__(self, file_path, s3_helper):
+    def __init__(self, file_path: str, s3_helper):
         """
         Initialize the repository
         
@@ -32,7 +31,7 @@ class JobRepository:
         logger.warning("No job data to save")
         return False
     
-    def upload_to_s3(self, s3_key):
+    def upload_to_s3(self, s3_key: str):
         """
         Upload job data to S3
         

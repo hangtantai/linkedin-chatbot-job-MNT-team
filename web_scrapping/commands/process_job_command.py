@@ -1,12 +1,10 @@
 import pandas as pd
 from typing import Dict
+from web_scrapping.utils.logger import logger
+from web_scrapping.utils.config import Config
 from web_scrapping.commands.base_command import Command
 from web_scrapping.commands.page_command import SavePageCommand
-from web_scrapping.utils.logger import logger
 from web_scrapping.factories.extractor_factory import ExtractorFactory
-from web_scrapping.utils.config import Config
-from selenium.webdriver.support.ui import WebDriverWait
-from bs4 import BeautifulSoup
 
 class ProcessJobCommand(Command):
     """Command to process job links and extract details"""
@@ -28,33 +26,12 @@ class ProcessJobCommand(Command):
         # Create the detail extractor strategy
         self.detail_extractor = ExtractorFactory.create_extractor("detail")
     
-    def _save_page_direct(self, url):
+    def _save_page_direct(self, url: str) -> None:
         """Direct page saving without human simulation for better performance"""
-        try:
-            # Navigate directly to the URL
-            self.driver.get(url)
-            
-            # Wait for page to load (standard wait)
-            WebDriverWait(self.driver, 10).until(
-                lambda d: d.execute_script("return document.readyState") == "complete"
-            )
-            
-            # Extract page content directly
-            content = self.driver.page_source
-            
-            # Parse the content with BeautifulSoup to clean and standardize
-            soup = BeautifulSoup(content, 'html.parser')
-            
-            # Write to file
-            with open(self.output_file, 'w', encoding='utf-8') as file:
-                file.write(soup.prettify())
-                
-            return True
-        except Exception as e:
-            logger.error(f"Error saving page content: {str(e)}")
-            return False
+        save_command = SavePageCommand(self.driver, url, self.output_file, use_human_simulation=False)
+        return save_command.execute()
         
-    def execute(self):
+    def execute(self) -> bool:
         """Execute the process job links command"""
         try:
             config = Config.get_config()
@@ -124,12 +101,12 @@ class ProcessJobCommand(Command):
             logger.error(f"Critical error in job processing: {str(e)}")
             return self.data
     
-    def undo(self):
+    def undo(self) -> bool:
         """Undo the processing operation (not applicable)"""
         # Job processing cannot be undone in a meaningful way
         logger.warning("Undo operation not supported for ProcessJobCommand")
         return False
         
-    def get_results(self):
+    def get_results(self) -> dict[str, str]:
         """Get the results of processing"""
         return self.data

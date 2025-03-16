@@ -4,11 +4,12 @@ from web_scrapping.utils.logger import logger
 import os
 import time
 import random
+from selenium.webdriver.support.ui import WebDriverWait
 
 class SavePageCommand(Command):
     """Command to save a web page's content to a file"""
     
-    def __init__(self, driver, url, output_file):
+    def __init__(self, driver, url: str, output_file: str, use_human: bool = True):
         """
         Initialize the command
         
@@ -20,6 +21,7 @@ class SavePageCommand(Command):
         super().__init__()
         self.driver = driver
         self.url = url
+        self.use_human = use_human
         self.output_file = output_file
         self.saved = False
         # Keep track of original content if any for undo
@@ -27,7 +29,7 @@ class SavePageCommand(Command):
         self.add_metadata("target url", url)
         self.add_metadata("output path", output_file)
     
-    def validate(self):
+    def validate(self) -> bool:
         """Check if save operation can proceed"""
         output_dir = os.path.dirname(self.output_file)
         if output_dir and not os.path.exists(output_dir):
@@ -38,7 +40,7 @@ class SavePageCommand(Command):
                 return False
         return True
     
-    def execute(self):
+    def execute(self) -> bool:
         """Execute the save page command with anti-detection measures"""
         try:
             # Check if file exists and store original content
@@ -46,20 +48,29 @@ class SavePageCommand(Command):
                 with open(self.output_file, 'r', encoding='utf-8') as file:
                     self.original_content = file.read()
             
-            # Navigate to the URL with human-like timing
+            # Navigate to the URL
             self.driver.get(self.url)
             
-            # Wait for page to load with a random delay (1.5-3 seconds)
-            time.sleep(random.uniform(1.5, 3))
-            
-            # Execute human-like browsing behavior
-            self._simulate_human_browsing()
-            
-            # Try different extraction methods until we get valid content
-            content = self._extract_content_with_retry()
+            if self.use_human_simulation:
+                # Wait for page to load with a random delay (1.5-3 seconds)
+                time.sleep(random.uniform(1.5, 3))
+                
+                # Execute human-like browsing behavior
+                self._simulate_human_browsing()
+                
+                # Try different extraction methods until we get valid content
+                content = self._extract_content_with_retry()
+            else:
+                # Direct extraction without human simulation for better performance
+                # Wait for page to load (standard wait)
+                WebDriverWait(self.driver, 10).until(
+                    lambda d: d.execute_script("return document.readyState") == "complete"
+                )
+                # Extract page content directly
+                content = self.driver.page_source
             
             if not content:
-                logger.error("Failed to extract valid content after multiple attempts")
+                logger.error("Failed to extract valid content")
                 return False
             
             # Parse the content with BeautifulSoup
@@ -76,7 +87,7 @@ class SavePageCommand(Command):
             logger.error(f"Failed to save page content: {str(e)}")
             return False
     
-    def _simulate_human_browsing(self):
+    def _simulate_human_browsing(self) -> bool:
         """Simulate human-like browsing behavior to avoid detection"""
         try:
             # Random scroll down with smooth behavior
@@ -112,7 +123,7 @@ class SavePageCommand(Command):
             logger.warning(f"Error during human browsing simulation: {str(e)}")
             return False
     
-    def _extract_content_with_retry(self, max_attempts=3):
+    def _extract_content_with_retry(self, max_attempts: int = 3) -> str:
         """Extract page content using multiple methods with retries"""
         extraction_methods = [
             self._extract_with_page_source,
@@ -145,23 +156,23 @@ class SavePageCommand(Command):
         logger.warning("All extraction methods failed, using page_source as fallback")
         return self.driver.page_source
     
-    def _extract_with_page_source(self):
+    def _extract_with_page_source(self) -> str:
         """Extract content using standard page_source"""
         return self.driver.page_source
     
-    def _extract_with_js_dom(self):
+    def _extract_with_js_dom(self) -> str:
         """Extract content using JavaScript DOM serialization"""
         return self.driver.execute_script("""
             return (new XMLSerializer()).serializeToString(document);
         """)
     
-    def _extract_with_js_innerHTML(self):
+    def _extract_with_js_innerHTML(self) -> str:
         """Extract content using document.documentElement.innerHTML"""
         return self.driver.execute_script("""
             return document.documentElement.outerHTML;
         """)
     
-    def _is_valid_content(self, content):
+    def _is_valid_content(self, content: str) -> str:
         """Check if the extracted content appears to be valid"""
         if not content or len(content) < 1000:
             return False
@@ -190,7 +201,7 @@ class SavePageCommand(Command):
         # Valid if we have job markers and no blockers
         return found_markers >= 1 and found_blockers == 0
     
-    def undo(self):
+    def undo(self) -> None:
         """Undo the save operation by restoring original content"""
         if not self.saved:
             return True

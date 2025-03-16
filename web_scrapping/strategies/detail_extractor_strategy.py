@@ -1,7 +1,5 @@
 from bs4 import BeautifulSoup
 import pandas as pd
-import re
-from typing import Dict, Any
 from web_scrapping.strategies.extractor_strategy import ExtractorStrategy
 from web_scrapping.utils.logger import logger
 

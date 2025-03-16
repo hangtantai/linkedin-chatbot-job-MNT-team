@@ -1,5 +1,4 @@
 import streamlit as st
-
 class Config:
     _config = {
         "email": st.secrets["EMAIL"],
@@ -23,6 +22,3 @@ class Config:
     def get_config(cls):
         """Get general configuration values"""
         return cls._config.copy()
-
-
-# https://www.linkedin.com/jobs/search/?currentJobId=4105549838&distance=25&f_E=1&f_PP=102267004&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_KEYWORD_HISTORY&refresh=true

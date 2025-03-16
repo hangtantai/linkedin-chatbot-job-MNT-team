@@ -31,20 +31,20 @@ class PaginationCommand(Command):
             )
         return self.pagination_container
 
-    def get_total_page(self):
+    def get_total_page(self) -> int:
         """Count and Return the total number of pages in the pagination bar"""
         container = self._get_pagination_container()
         page_buttons = container.find_elements(By.XPATH, config["li_class"])
         total_pages = len(page_buttons)
         return total_pages
 
-    def get_current_page(self):
+    def get_current_page(self) -> int:
         """Get the current active page number"""
         container = self._get_pagination_container()
         current_page_element = container.find_element(By.XPATH, config["li_active"])
         return int(current_page_element.get_attribute(config["btn_class"]))
     
-    def navigate_to_page(self, target_page):
+    def navigate_to_page(self, target_page: str) -> dict[str, str]:
         """Navigate to a specific page number"""
         try:
             urls = {}
@@ -68,7 +68,7 @@ class PaginationCommand(Command):
             logger.error(f"Error navigating to page {target_page}: {str(e)}")
             return False
     
-    def navigate_to_next_page(self):
+    def navigate_to_next_page(self) -> dict[str, str]:
         """Navigate to the next page"""
         try:
             container = self._get_pagination_container()
@@ -100,7 +100,7 @@ class PaginationCommand(Command):
             return False
 
 
-    def execute(self):
+    def execute(self) -> bool:
         """Navigate and extract data from pages"""
         try:
             self.driver.get(self.origin_url)
@@ -153,5 +153,5 @@ class PaginationCommand(Command):
             logger.error(f"Error in pagination execution: {str(e)}")
             return False
         
-    def undo(self):
+    def undo(self) -> bool:
         pass

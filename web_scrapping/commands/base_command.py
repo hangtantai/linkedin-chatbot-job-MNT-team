@@ -36,12 +36,12 @@ class Command(ABC):
             self.end_time = time.time()
 
     @abstractmethod
-    def execute(self):
+    def execute(self) -> None:
         """Execuate the command"""
         pass
 
     @abstractmethod
-    def undo(self):
+    def undo(self) -> None:
         """Undo the command (if possible)"""
         pass
 

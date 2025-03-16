@@ -6,7 +6,7 @@ from web_scrapping.utils.config import Config
 class LoginCommand(Command):
     """Command to log in to LinkedIn"""
     
-    def __init__(self, driver, email, password):
+    def __init__(self, driver, email: str, password: str):
         """
         Initialize the command
         
@@ -22,14 +22,14 @@ class LoginCommand(Command):
         self.logged_in = False
         self.add_metadata("target site", "Linkedin")
     
-    def validate(self):
+    def validate(self) -> bool:
         """Check if login can proceed"""
         if not self.email or not self.password:
             logger.error("Email or Password missing")
             return False
         return True
     
-    def execute(self):
+    def execute(self) -> bool:
         """Execute the login command"""
         try:
             config = Config.get_config()
@@ -53,7 +53,7 @@ class LoginCommand(Command):
             logger.error(f"Failed to login to LinkedIn: {str(e)}")
             return False
     
-    def undo(self):
+    def undo(self) -> bool:
         """Logout from LinkedIn (if logged in)"""
         if not self.logged_in:
             return True
