@@ -1,0 +1,16 @@
+2025-03-16 12:47:48,655 - linkedin_scapper - INFO - Chrome Driver initialized successfully
+2025-03-16 12:47:56,835 - linkedin_scapper - INFO - Successfully logged into LinkedIn
+2025-03-16 12:48:01,587 - linkedin_scapper - INFO - Found 3 pages total
+2025-03-16 12:48:01,771 - linkedin_scapper - INFO - Starting extraction from page 1 of 3
+2025-03-16 12:48:04,183 - linkedin_scapper - INFO - Successfully navigated to page 2
+2025-03-16 12:48:06,127 - linkedin_scapper - INFO - Successfully navigated to page 3
+2025-03-16 12:48:06,176 - linkedin_scapper - INFO - Already on the last page (3)
+2025-03-16 12:48:06,177 - linkedin_scapper - INFO - Completed extraction from all pages
+2025-03-16 12:48:06,180 - linkedin_scapper - INFO - Processing page 1 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4169177152&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true
+2025-03-16 12:48:11,494 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 12:48:11,705 - linkedin_scapper - INFO - Successfully read file: C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 12:48:11,751 - linkedin_scapper - INFO - Found 81 div tags in main container
+2025-03-16 12:48:11,752 - linkedin_scapper - INFO - Successfully collected 0 job links
+2025-03-16 12:48:11,752 - linkedin_scapper - INFO - Successfully extracted 0 links out of 0 found
+2025-03-16 12:48:11,753 - linkedin_scapper - WARNING - No job links found on page 1
+2025-03-16 12:48:11,753 - linkedin_scapper - INFO - Processing page 2 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4129806169&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&start=25

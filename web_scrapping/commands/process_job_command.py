@@ -5,6 +5,8 @@ from web_scrapping.commands.page_command import SavePageCommand
 from web_scrapping.utils.logger import logger
 from web_scrapping.factories.extractor_factory import ExtractorFactory
 from web_scrapping.utils.config import Config
+from selenium.webdriver.support.ui import WebDriverWait
+from bs4 import BeautifulSoup
 
 class ProcessJobCommand(Command):
     """Command to process job links and extract details"""
@@ -25,36 +27,96 @@ class ProcessJobCommand(Command):
         self.processed_count = 0
         # Create the detail extractor strategy
         self.detail_extractor = ExtractorFactory.create_extractor("detail")
+    
+    def _save_page_direct(self, url):
+        """Direct page saving without human simulation for better performance"""
+        try:
+            # Navigate directly to the URL
+            self.driver.get(url)
+            
+            # Wait for page to load (standard wait)
+            WebDriverWait(self.driver, 10).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+            
+            # Extract page content directly
+            content = self.driver.page_source
+            
+            # Parse the content with BeautifulSoup to clean and standardize
+            soup = BeautifulSoup(content, 'html.parser')
+            
+            # Write to file
+            with open(self.output_file, 'w', encoding='utf-8') as file:
+                file.write(soup.prettify())
+                
+            return True
+        except Exception as e:
+            logger.error(f"Error saving page content: {str(e)}")
+            return False
         
     def execute(self):
         """Execute the process job links command"""
         try:
             config = Config.get_config()
-            total_links = len(self.link_data)
-            logger.info(f"Starting to process {total_links} job links")
-            
-            for job_title, link_path in self.link_data.items():
-                try:
-                    # Construct full URL
-                    url = f"{config['domain']}{link_path}"
-                    
-                    # Use SavePageCommand to get the job details page
-                    save_command = SavePageCommand(self.driver, url, self.output_file)
-                    save_command.execute()
-                    
-                    # Extract information from the saved page
-                    job_df = self.detail_extractor.extract(self.output_file)
-                    
-                    if not job_df.empty:
-                        self.data = pd.concat([self.data, job_df], ignore_index=True)
-                        self.processed_count += 1
-                        logger.info(f"Processed job {self.processed_count}/{total_links}: {job_title}")
-                    else:
-                        logger.warning(f"No data extracted for job: {job_title}")
+            # Check if we received a list or dictionary and handle accordingly
+            if isinstance(self.link_data, list):
+                # Process as list
+                total_links = len(self.link_data)
+                logger.info(f"Starting to process {total_links} job links from list")
+                
+                for index, link_path in enumerate(self.link_data):
+                    try:
+                        # Construct full URL if needed
+                        if link_path.startswith('http'):
+                            url = link_path
+                        else:
+                            url = f"{config['domain']}{link_path}"
                         
-                except Exception as e:
-                    logger.error(f"Failed to process job {job_title}: {str(e)}")
-                    continue
+                        # Use direct page saving for better performance
+                        if self._save_page_direct(url):
+                            # Extract information from the saved page
+                            job_df = self.detail_extractor.extract(self.output_file)
+                            
+                            if not job_df.empty:
+                                self.data = pd.concat([self.data, job_df], ignore_index=True)
+                                self.processed_count += 1
+                                logger.info(f"Processed job {self.processed_count}/{total_links}: Link #{index+1}")
+                            else:
+                                logger.warning(f"No data extracted for job: Link #{index+1}")
+                        else:
+                            logger.error(f"Failed to save page for Link #{index+1}")
+                            
+                    except Exception as e:
+                        logger.error(f"Failed to process job Link #{index+1}: {str(e)}")
+                        continue
+                
+            else:
+                # Process as dictionary (original implementation)
+                total_links = len(self.link_data)
+                logger.info(f"Starting to process {total_links} job links from dictionary")
+                
+                for job_title, link_path in self.link_data.items():
+                    try:
+                        # Construct full URL
+                        url = f"{config['domain']}{link_path}"
+                        
+                        # Use direct page saving for better performance
+                        if self._save_page_direct(url):
+                            # Extract information from the saved page
+                            job_df = self.detail_extractor.extract(self.output_file)
+                            
+                            if not job_df.empty:
+                                self.data = pd.concat([self.data, job_df], ignore_index=True)
+                                self.processed_count += 1
+                                logger.info(f"Processed job {self.processed_count}/{total_links}: {job_title}")
+                            else:
+                                logger.warning(f"No data extracted for job: {job_title}")
+                        else:
+                            logger.error(f"Failed to save page for {job_title}")
+                            
+                    except Exception as e:
+                        logger.error(f"Failed to process job {job_title}: {str(e)}")
+                        continue
                     
             logger.info(f"Successfully processed {self.processed_count} out of {total_links} jobs")
             return self.data

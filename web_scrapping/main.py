@@ -10,6 +10,9 @@ from web_scrapping.commands.page_command import SavePageCommand
 from web_scrapping.commands.process_job_command import ProcessJobCommand
 from web_scrapping.utils.config import Config
 from web_scrapping.repository.job_repository import JobRepository
+from web_scrapping.commands.pagination_command import PaginationCommand
+
+
 def main():
     try:
         # Suppress warnings
@@ -27,21 +30,59 @@ def main():
         
         # Job search URL
         search_url = config["search_link"]
+
+        # Pagination page
+        pagination = PaginationCommand(driver,search_url)
+        pagination_urls = pagination.execute()
         
-        # Extract job links
+         # Prepare link file
         link_file = os.path.join(os.path.dirname(__file__), config["link_file"])
-        save_page = SavePageCommand(driver, search_url, link_file)
-        save_page.execute()
-        link_extractor = ExtractorFactory.create_extractor("link")
-        link_extracted = link_extractor.extract(link_file)
         
-        if not link_extracted:
-            logger.error("No job links found")
+        # Ensure the file is empty to start (create or truncate)
+        with open(link_file, 'w') as f:
+            pass
+        
+        # Process each pagination URL to extract job links
+        all_links = {} 
+        for page_num, url in pagination_urls.items():
+            try:
+                logger.info(f"Processing page {page_num} with URL: {url}")
+                
+                # Navigate to the page
+                driver.get(url)
+                
+                # Save the page HTML
+                save_page = SavePageCommand(driver, url, link_file)
+                save_page.execute()
+                
+                # Extract job links from this page
+                link_extractor = ExtractorFactory.create_extractor("link")
+                page_links = link_extractor.extract(link_file)
+                if page_links:
+                    logger.info(f"Extracted {len(page_links)} job links from page {page_num}")
+                    all_links.update(page_links)
+                else:
+                    logger.warning(f"No job links found on page {page_num}")
+                
+            except Exception as e:
+                logger.error(f"Failed to extract page {page_num} with URL {url}: {str(e)}")
+                continue
+        
+        # Check if we found any job links
+        if not all_links:
+            logger.error("No job links found across all pages")
             return
             
-        # Process job details
+        logger.info(f"Total job links extracted from all pages: {len(all_links)}")
+        print(all_links)
+        # Save all extracted links to the main link file (overwrite)
+        with open(link_file, 'w') as f:
+            for name, link in all_links.items():
+                f.write(f"{link}\n")
+        
+        # Process job details from all collected links
         details_file = os.path.join(os.path.dirname(__file__), config["detail_file"])
-        process_job = ProcessJobCommand(driver, link_extracted, details_file)
+        process_job = ProcessJobCommand(driver, all_links, details_file)
         data = process_job.execute()
         
         # destination directory
@@ -53,6 +94,7 @@ def main():
         # Save results and upload to S3 if successful
         if job_repo.save(data):
             job_repo.upload_to_s3(config["job_data"])
+            logger.info(f"Successfully uploaded job data to S3 bucket: {config['s3_bucket']}")
 
     except Exception as e:
         logger.error(f"Critical error in main process: {str(e)}")
