@@ -43,7 +43,6 @@ class LinkExtractorStrategy(ExtractorStrategy):
                 # Find all div tags within the main container
                 div_tags = main_container.find_all('div')
                 logger.info(f"Found {len(div_tags)} div tags in main container")
-
                 list_elements = {}
                 a_tags = []
 

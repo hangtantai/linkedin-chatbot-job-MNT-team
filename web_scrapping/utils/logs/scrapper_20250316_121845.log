@@ -1,0 +1,8 @@
+2025-03-16 12:18:47,952 - linkedin_scapper - INFO - Chrome Driver initialized successfully
+2025-03-16 12:18:56,414 - linkedin_scapper - INFO - Successfully logged into LinkedIn
+2025-03-16 12:19:01,333 - linkedin_scapper - INFO - Found 3 pages total
+2025-03-16 12:19:01,562 - linkedin_scapper - INFO - Starting extraction from page 1 of 3
+2025-03-16 12:19:03,594 - linkedin_scapper - INFO - Successfully navigated to page 2
+2025-03-16 12:19:04,872 - linkedin_scapper - INFO - Successfully navigated to page 3
+2025-03-16 12:19:05,288 - linkedin_scapper - INFO - Already on the last page (3)
+2025-03-16 12:19:05,291 - linkedin_scapper - INFO - Completed extraction from all pages

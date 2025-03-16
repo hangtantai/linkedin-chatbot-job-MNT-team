@@ -1,0 +1,53 @@
+2025-03-16 12:34:00,351 - linkedin_scapper - INFO - Chrome Driver initialized successfully
+2025-03-16 12:34:09,743 - linkedin_scapper - INFO - Successfully logged into LinkedIn
+2025-03-16 12:34:15,515 - linkedin_scapper - INFO - Found 3 pages total
+2025-03-16 12:34:15,573 - linkedin_scapper - INFO - Starting extraction from page 1 of 3
+2025-03-16 12:34:16,468 - linkedin_scapper - INFO - Successfully navigated to page 2
+2025-03-16 12:34:17,987 - linkedin_scapper - ERROR - Error navigating to next page: Message: element click intercepted: Element <button aria-label="Page 3" type="button" data-ember-action="" data-ember-action-400="400">...</button> is not clickable at point (270, 636). Other element would receive the click: <div class="scaffold-layout__list " tabindex="-1">...</div>
+  (Session info: chrome=134.0.6998.89)
+Stacktrace:
+	GetHandleVerifier [0x00007FF63B2EFE45+26629]
+	(No symbol) [0x00007FF63B256010]
+	(No symbol) [0x00007FF63B0E931A]
+	(No symbol) [0x00007FF63B1477A9]
+	(No symbol) [0x00007FF63B145162]
+	(No symbol) [0x00007FF63B142201]
+	(No symbol) [0x00007FF63B141108]
+	(No symbol) [0x00007FF63B1328A4]
+	(No symbol) [0x00007FF63B167AAA]
+	(No symbol) [0x00007FF63B132156]
+	(No symbol) [0x00007FF63B167CC0]
+	(No symbol) [0x00007FF63B190169]
+	(No symbol) [0x00007FF63B167883]
+	(No symbol) [0x00007FF63B130550]
+	(No symbol) [0x00007FF63B131803]
+	GetHandleVerifier [0x00007FF63B6472BD+3529853]
+	GetHandleVerifier [0x00007FF63B65DA22+3621858]
+	GetHandleVerifier [0x00007FF63B6524D3+3575443]
+	GetHandleVerifier [0x00007FF63B3BB77A+860474]
+	(No symbol) [0x00007FF63B26088F]
+	(No symbol) [0x00007FF63B25CBC4]
+	(No symbol) [0x00007FF63B25CD66]
+	(No symbol) [0x00007FF63B24C2C9]
+	BaseThreadInitThunk [0x00007FFAEDB7E8D7+23]
+	RtlUserThreadStart [0x00007FFAEFB3BF6C+44]
+
+2025-03-16 12:34:17,988 - linkedin_scapper - INFO - Completed extraction from all pages
+2025-03-16 12:34:17,992 - linkedin_scapper - INFO - Processing page 1 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4169177152&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true
+2025-03-16 12:34:22,783 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 12:34:23,028 - linkedin_scapper - INFO - Successfully read file: C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 12:34:23,080 - linkedin_scapper - INFO - Found 81 div tags in main container
+2025-03-16 12:34:23,081 - linkedin_scapper - INFO - Successfully collected 0 job links
+2025-03-16 12:34:23,082 - linkedin_scapper - INFO - Successfully extracted 0 links out of 0 found
+2025-03-16 12:34:23,082 - linkedin_scapper - WARNING - No job links found on page 1
+2025-03-16 12:34:23,083 - linkedin_scapper - INFO - Processing page 2 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4169177152&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&start=25
+2025-03-16 12:34:28,202 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 12:34:28,385 - linkedin_scapper - INFO - Successfully read file: C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 12:34:28,438 - linkedin_scapper - INFO - Found 81 div tags in main container
+2025-03-16 12:34:28,440 - linkedin_scapper - INFO - Successfully collected 0 job links
+2025-03-16 12:34:28,440 - linkedin_scapper - INFO - Successfully extracted 0 links out of 0 found
+2025-03-16 12:34:28,440 - linkedin_scapper - WARNING - No job links found on page 2
+2025-03-16 12:34:28,441 - linkedin_scapper - ERROR - No job links found across all pages
+2025-03-16 12:34:30,876 - linkedin_scapper - INFO - Browser session close
+2025-03-16 12:34:30,876 - linkedin_scapper - INFO - Cleaned up output.txt
+2025-03-16 12:34:30,878 - linkedin_scapper - ERROR - Failed to clean up resources: cannot access local variable 'details_file' where it is not associated with a value

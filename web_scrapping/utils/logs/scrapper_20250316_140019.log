@@ -1,0 +1,32 @@
+2025-03-16 14:00:24,546 - linkedin_scapper - INFO - Chrome Driver initialized successfully
+2025-03-16 14:00:48,830 - linkedin_scapper - INFO - Successfully logged into LinkedIn
+2025-03-16 14:00:55,031 - linkedin_scapper - INFO - Found 3 pages total
+2025-03-16 14:00:55,123 - linkedin_scapper - INFO - Starting extraction from page 1 of 3
+2025-03-16 14:00:56,073 - linkedin_scapper - INFO - Successfully navigated to page 2
+2025-03-16 14:00:57,452 - linkedin_scapper - INFO - Successfully navigated to page 3
+2025-03-16 14:00:57,604 - linkedin_scapper - INFO - Already on the last page (3)
+2025-03-16 14:00:57,605 - linkedin_scapper - INFO - Completed extraction from all pages
+2025-03-16 14:00:57,611 - linkedin_scapper - INFO - Processing page 1 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4169177152&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true
+2025-03-16 14:01:15,133 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 14:01:15,317 - linkedin_scapper - INFO - Successfully read file: C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 14:01:15,400 - linkedin_scapper - INFO - Found 122 div tags in main container
+2025-03-16 14:01:15,407 - linkedin_scapper - INFO - Successfully collected 7 job links
+2025-03-16 14:01:15,407 - linkedin_scapper - INFO - Successfully extracted 7 links out of 7 found
+2025-03-16 14:01:15,408 - linkedin_scapper - INFO - Extracted 7 job links from page 1
+2025-03-16 14:01:15,408 - linkedin_scapper - INFO - Processing page 2 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4160166172&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&start=25
+2025-03-16 14:01:35,745 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 14:01:35,861 - linkedin_scapper - INFO - Successfully read file: C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 14:01:36,005 - linkedin_scapper - INFO - Found 116 div tags in main container
+2025-03-16 14:01:36,010 - linkedin_scapper - INFO - Successfully collected 7 job links
+2025-03-16 14:01:36,010 - linkedin_scapper - INFO - Successfully extracted 7 links out of 7 found
+2025-03-16 14:01:36,011 - linkedin_scapper - INFO - Extracted 7 job links from page 2
+2025-03-16 14:01:36,011 - linkedin_scapper - INFO - Processing page 3 with URL: https://www.linkedin.com/jobs/search/?currentJobId=4168353920&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true&start=50
+2025-03-16 14:01:52,632 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 14:01:52,728 - linkedin_scapper - INFO - Successfully read file: C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
+2025-03-16 14:01:52,788 - linkedin_scapper - INFO - Found 112 div tags in main container
+2025-03-16 14:01:52,793 - linkedin_scapper - INFO - Successfully collected 7 job links
+2025-03-16 14:01:52,793 - linkedin_scapper - INFO - Successfully extracted 7 links out of 7 found
+2025-03-16 14:01:52,793 - linkedin_scapper - INFO - Extracted 7 job links from page 3
+2025-03-16 14:01:52,793 - linkedin_scapper - INFO - Total job links extracted from all pages: 21
+2025-03-16 14:01:52,795 - linkedin_scapper - ERROR - Critical error in main process: 'list' object has no attribute 'items'
+2025-03-16 14:01:55,213 - linkedin_scapper - INFO - Browser session close

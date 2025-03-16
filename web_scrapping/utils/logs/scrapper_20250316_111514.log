@@ -1,0 +1,3 @@
+2025-03-16 11:15:16,821 - linkedin_scapper - INFO - Chrome Driver initialized successfully
+2025-03-16 11:15:28,311 - linkedin_scapper - INFO - Successfully logged into LinkedIn
+2025-03-16 11:15:32,803 - linkedin_scapper - INFO - Successfully saved page content to C:\Users\Hang Tan Tai\Documents\personal_space\selenium\web_scrapping\output.txt
