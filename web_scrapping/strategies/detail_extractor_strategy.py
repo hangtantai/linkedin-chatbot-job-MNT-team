@@ -6,7 +6,7 @@ from web_scrapping.utils.logger import logger
 class DetailExtractorStrategy(ExtractorStrategy):
     """Strategy for extracting job details from a saved HTML page"""
     
-    def extract(self, file_name: str) -> pd.DataFrame:
+    def extract(self, file_name: str, url: str) -> pd.DataFrame:
         """
         Extract job details from HTML page
         
@@ -49,8 +49,12 @@ class DetailExtractorStrategy(ExtractorStrategy):
             try:
                 # get title of job
                 job_title = main_container.find("h1").get_text().strip()
-                job_data["job_title"] = job_title
-                logger.info(f"Successfully extracted job title info")
+                if job_title:
+                    job_data["job_title"] = job_title
+                    logger.info(f"Successfully extracted job title info")
+                else:
+                    job_data["job_title"] = None
+                    logger.warning(f"Job title not found")
             except AttributeError as e:
                 logger.error(f"Failed to extract job title with problem: {str(e)}")
                 job_data["job_title"] = None
@@ -64,10 +68,25 @@ class DetailExtractorStrategy(ExtractorStrategy):
                     company_name = company_link.get_text(strip=True) if company_link else None
                     job_data["company_name"] = company_name
                     logger.info(f"Successfully extracted company name info")
+                else:
+                    job_data["company_name"] = None
+                    logger.warning(f"Company name not found")
 
             except Exception as e:
                 logger.error(f"Failed to extract company name with problem: {str(e)}")
                 job_data["company_name"] = None
+            
+            # url to linkedin 
+            try:
+                if url:
+                    job_data["url"] = url
+                    logger.info("Successfully extracted url info")
+                else:
+                    job_data["url"] = None
+                    logger.warning(f"Url not found")
+            except Exception as e:
+                logger.error(f"Failed to extract url to linkedin job")
+                job_data["url"] = None
             
             # get location, time, applicants
             try:
@@ -124,6 +143,7 @@ class DetailExtractorStrategy(ExtractorStrategy):
                     job_data["job_role"] = ",".join(role_list) if role_list else None
                     logger.info(f"Successful extracted job role")
                 else:
+                    job_data["job_role"] = None
                     logger.warning(f"Role container not found")
             except Exception as e:
                 logger.error(f"Error extracting job role: {str(e)}")

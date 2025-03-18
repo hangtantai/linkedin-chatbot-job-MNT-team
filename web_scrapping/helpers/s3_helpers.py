@@ -3,7 +3,6 @@ import boto3
 from typing import Optional
 from botocore.exceptions import ClientError
 from web_scrapping.utils.logger import logger
-import streamlit as st
 from web_scrapping.utils.config import Config
 class S3Helper:
     # Singleton pattern instance storage

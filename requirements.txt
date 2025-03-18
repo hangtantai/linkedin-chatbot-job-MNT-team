@@ -16,3 +16,4 @@ langchain-groq
 langchain-huggingface
 faiss-cpu
 boto3
+rank_bm25

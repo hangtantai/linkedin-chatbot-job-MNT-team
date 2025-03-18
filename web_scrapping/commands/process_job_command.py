@@ -80,7 +80,7 @@ class ProcessJobCommand(Command):
                         # Use direct page saving for better performance
                         if self._save_page_direct(url):
                             # Extract information from the saved page
-                            job_df = self.detail_extractor.extract(self.output_file)
+                            job_df = self.detail_extractor.extract(self.output_file, url)
                             
                             if not job_df.empty:
                                 self.data = pd.concat([self.data, job_df], ignore_index=True)

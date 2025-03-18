@@ -57,6 +57,10 @@ class SessionHandler:
             self.session_state.chat_id = str(chat_id)
             if "selected_chat" not in self.session_state:
                 self.session_state.selected_chat = str(chat_id)
+            
+            # Set a flag to indicate we're switching chats - don't reinitialize everything
+            self.session_state.switching_chat = True
+            
         st.rerun()
 
     def initialize_session_state(self) -> None:

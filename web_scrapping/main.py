@@ -74,7 +74,6 @@ def main():
             return
             
         logger.info(f"Total job links extracted from all pages: {len(all_links)}")
-        print(all_links)
         # Save all extracted links to the main link file (overwrite)
         with open(link_file, 'w') as f:
             for name, link in all_links.items():

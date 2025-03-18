@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 class SavePageCommand(Command):
     """Command to save a web page's content to a file"""
     
-    def __init__(self, driver, url: str, output_file: str, use_human: bool = True):
+    def __init__(self, driver, url: str, output_file: str, use_human_simulation: bool = True):
         """
         Initialize the command
         
@@ -21,7 +21,7 @@ class SavePageCommand(Command):
         super().__init__()
         self.driver = driver
         self.url = url
-        self.use_human = use_human
+        self.use_human_simulation = use_human_simulation
         self.output_file = output_file
         self.saved = False
         # Keep track of original content if any for undo
