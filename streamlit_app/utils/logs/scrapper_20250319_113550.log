@@ -1,0 +1,20 @@
+2025-03-19 11:35:51,655 - linkedin_scapper - INFO - Loading embeddings model...
+2025-03-19 11:36:21,967 - linkedin_scapper - INFO - Embeddings loaded successfully!
+2025-03-19 11:36:21,968 - linkedin_scapper - INFO - Loading vector database...
+2025-03-19 11:36:21,969 - linkedin_scapper - INFO - Loading Chroma from streamlit_app/db/vector_db...
+2025-03-19 11:36:22,320 - linkedin_scapper - INFO - Vector database loaded successfully!
+2025-03-19 11:36:22,320 - linkedin_scapper - INFO - ChatHandler initialization complete!
+2025-03-19 11:36:22,320 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:36:22,322 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:36:22,344 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:36:22,345 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:36:22,345 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True
+2025-03-19 11:36:42,353 - linkedin_scapper - INFO - Using hybrid retriever (BM25 + Vector)
+2025-03-19 11:36:42,355 - linkedin_scapper - INFO - Running hybrid search query...
+2025-03-19 11:36:44,401 - linkedin_scapper - INFO - Successfully retrieved answer with 10 source documents
+2025-03-19 11:36:44,402 - linkedin_scapper - INFO - QNA runs successfully
+2025-03-19 11:36:51,554 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:36:51,565 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:36:51,573 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:36:51,573 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:36:51,573 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True

@@ -44,7 +44,6 @@ if "rerun" in params:
 # If force_rerun is set, reset the chat handler and force a rerun
 if st.session_state.force_rerun:
     if 'chat_handler' in st.session_state:
-        print("Force rerun requested. Reinitializing chat handler.")
         del st.session_state.chat_handler
         st.session_state.handler_initialized = False
         st.session_state.force_rerun = False
@@ -78,7 +77,6 @@ def check_initialization_status():
     
     # Add debug information
     print(f"Checking initialization status: is_ready={chat_handler.is_ready}, handler_initialized={st.session_state.handler_initialized}")
-    
     return False
 
 # Initialize chat handler (this won't block now)
@@ -263,11 +261,7 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
             with st.spinner("Thinking..."):
                 # Generate response
                 response_content = chat_handler.retrieve_qa(user_message)
-                
-                # Handle None or empty responses
-                # if not response_content:
-                #     response_content = "I'm sorry, I couldn't generate a response at this time. Please try again later."
-                
+
                 # Stream the response
                 chat_handler.stream_response(response_content, message_placeholder)
                 

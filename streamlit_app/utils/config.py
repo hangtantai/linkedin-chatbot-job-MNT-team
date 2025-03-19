@@ -30,13 +30,15 @@ class Config:
                 "db": st.secrets["DB_AIVEN"],
                 "port": int(st.secrets["PORT_AIVEN"]),
                 "charset": "utf8mb4",
-                "cursorclass": pymysql.cursors.DictCursor,
+                # "cursorclass": pymysql.cursors.DictCursor,
                 "connect_timeout": 10,
                 "read_timeout": 10,
                 "write_timeout": 10,
             },
         "table_name": st.secrets["TABLE_AIVEN"],
         "vector_db_path": "streamlit_app/db/vector_db",
+        "model_name_vectordb": "sentence-transformers/all-MiniLM-L6-v2",
+        "cache_folder": "streamlit_app/models/vector_db/"
     }
 
     @classmethod

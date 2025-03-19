@@ -11,7 +11,7 @@ if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 from streamlit_app.utils.config import Config
-
+from streamlit_app.utils.logger import logger
 # Variables
 config = Config()
 DB_config = config.get_config()["DB_config"]
@@ -35,10 +35,10 @@ class Database:
         """
         try:
             self.connection = pymysql.connect(**self.db_config)
-            print("Database connection established!")
+            logger.info(f"Database connection established!")
             return self.connection
         except pymysql.Error as e:
-            print(f"Error connecting to the database: {e}")
+            logger.error(f"Error connecting to the database: {e}")
             return None
 
     def close_connection(self) -> None:
@@ -50,7 +50,7 @@ class Database:
         """
         if self.connection:
             self.connection.close()
-            print("Database connection closed.")
+            logger.info("Database connection closed.")
             self.connection = None
 
     def fetch_data(self) -> pd.DataFrame:
@@ -65,9 +65,9 @@ class Database:
             pd.DataFrame: A DataFrame containing the fetched data.
         """
         if not self.connection:
-            print("No active connection. Opening connection ...")
+            logger.info("No active connection. Opening connection ...")
             self.connection = self.open_connection()
-            print(self.connection)
+            logger.info(self.connection)
 
         try:
             with self.connection.cursor() as cursor:
@@ -75,7 +75,7 @@ class Database:
                 df = cursor.fetchall()
                 return df if df else None
         except pymysql.Error as e:
-            print(f"Error fetching data from the database: {e}")
+            logger.error(f"Error fetching data from the database: {e}")
             return None
         finally:
             self.close_connection()
@@ -92,7 +92,7 @@ class Database:
             pd.DataFrame: A DataFrame containing the fetched data.
         """
         if not self.connection:
-            print("No active connection. Opening connection ...")
+            logger.info("No active connection. Opening connection ...")
             self.connection = self.open_connection()
 
         try:
@@ -104,7 +104,7 @@ class Database:
                         break
                     yield rows
         except pymysql.Error as e:
-            print(f"Error fetching data from the database: {e}")
+            logger.error(f"Error fetching data from the database: {e}")
             return None
         finally:
             self.close_connection()

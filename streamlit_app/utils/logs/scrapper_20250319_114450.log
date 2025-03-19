@@ -1,0 +1,25 @@
+2025-03-19 11:44:50,874 - linkedin_scapper - INFO - Loading embeddings model...
+2025-03-19 11:45:33,474 - linkedin_scapper - INFO - Embeddings loaded successfully!
+2025-03-19 11:45:33,475 - linkedin_scapper - INFO - Loading vector database...
+2025-03-19 11:45:33,477 - linkedin_scapper - INFO - Loading Chroma from streamlit_app/db/vector_db...
+2025-03-19 11:45:33,772 - linkedin_scapper - INFO - Vector database loaded successfully!
+2025-03-19 11:45:33,773 - linkedin_scapper - INFO - ChatHandler initialization complete!
+2025-03-19 11:45:33,773 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:45:33,774 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:45:33,793 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:45:33,793 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:45:33,794 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True
+2025-03-19 11:45:38,020 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:45:38,022 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:45:38,028 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:45:38,028 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:45:38,029 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True
+2025-03-19 11:45:54,813 - linkedin_scapper - INFO - Using hybrid retriever (BM25 + Vector)
+2025-03-19 11:45:54,815 - linkedin_scapper - INFO - Running hybrid search query...
+2025-03-19 11:45:56,555 - linkedin_scapper - INFO - Successfully retrieved answer with 10 source documents
+2025-03-19 11:45:56,556 - linkedin_scapper - INFO - QNA runs successfully
+2025-03-19 11:46:05,136 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:46:05,144 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:46:05,148 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:46:05,149 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:46:05,149 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True

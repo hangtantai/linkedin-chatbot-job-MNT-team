@@ -1,0 +1,19 @@
+2025-03-19 11:01:58,488 - linkedin_scapper - INFO - Loading embeddings model...
+2025-03-19 11:02:34,449 - linkedin_scapper - INFO - Embeddings loaded successfully!
+2025-03-19 11:02:34,449 - linkedin_scapper - INFO - Loading vector database...
+2025-03-19 11:02:34,450 - linkedin_scapper - INFO - Loading Chroma from streamlit_app/db/vector_db...
+2025-03-19 11:02:35,245 - linkedin_scapper - INFO - Vector database loaded successfully!
+2025-03-19 11:02:35,246 - linkedin_scapper - INFO - ChatHandler initialization complete!
+2025-03-19 11:02:35,246 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:02:35,247 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:02:35,284 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:02:35,284 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:02:35,285 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True
+2025-03-19 11:02:50,886 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 11:02:50,889 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 11:02:50,893 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 11:02:50,893 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 11:02:50,893 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True
+2025-03-19 11:03:12,448 - linkedin_scapper - INFO - Using hybrid retriever (BM25 + Vector)
+2025-03-19 11:03:12,450 - linkedin_scapper - INFO - Running hybrid search query...
+2025-03-19 11:03:12,456 - linkedin_scapper - ERROR - Error in retrieve_qa: 'set' object has no attribute 'split'
