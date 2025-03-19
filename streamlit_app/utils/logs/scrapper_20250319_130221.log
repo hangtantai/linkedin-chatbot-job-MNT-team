@@ -1,0 +1,31 @@
+2025-03-19 13:02:22,272 - linkedin_scapper - INFO - Loading embeddings model...
+2025-03-19 13:02:48,120 - linkedin_scapper - INFO - Embeddings loaded successfully!
+2025-03-19 13:02:48,120 - linkedin_scapper - INFO - Downloading vector database from S3...
+2025-03-19 13:02:48,594 - linkedin_scapper - INFO - Downloading files from linkedin-job-vector-database/vector_database/faiss to streamlit_app/db/vector_db
+2025-03-19 13:02:49,671 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/data_level0.bin to streamlit_app/db/vector_db\58eef994-e8a1-47a4-9029-50f172cd49cf\data_level0.bin
+2025-03-19 13:02:52,295 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/header.bin to streamlit_app/db/vector_db\58eef994-e8a1-47a4-9029-50f172cd49cf\header.bin
+2025-03-19 13:02:52,970 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/length.bin to streamlit_app/db/vector_db\58eef994-e8a1-47a4-9029-50f172cd49cf\length.bin
+2025-03-19 13:02:53,709 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/link_lists.bin to streamlit_app/db/vector_db\58eef994-e8a1-47a4-9029-50f172cd49cf\link_lists.bin
+2025-03-19 13:02:54,374 - linkedin_scapper - INFO - Downloading vector_database/faiss/chroma.sqlite3 to streamlit_app/db/vector_db\chroma.sqlite3
+2025-03-19 13:02:55,519 - linkedin_scapper - INFO - Downloading vector_database/faiss/index.faiss to streamlit_app/db/vector_db\index.faiss
+2025-03-19 13:02:56,255 - linkedin_scapper - INFO - Downloading vector_database/faiss/index.pkl to streamlit_app/db/vector_db\index.pkl
+2025-03-19 13:02:57,009 - linkedin_scapper - INFO - Vector database files downloaded successfully!
+2025-03-19 13:02:57,757 - linkedin_scapper - INFO - Downloaded BM25 retriever to streamlit_app/db\bm25.pkl
+2025-03-19 13:02:57,758 - linkedin_scapper - INFO - Loading vector database...
+2025-03-19 13:02:57,759 - linkedin_scapper - INFO - Downloading vector database files from S3 bucket linkedin-job-vector-database/vector_database/faiss...
+2025-03-19 13:02:58,786 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/data_level0.bin to streamlit_app/db/vector_db\data_level0.bin
+2025-03-19 13:03:01,204 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/header.bin to streamlit_app/db/vector_db\header.bin
+2025-03-19 13:03:01,846 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/length.bin to streamlit_app/db/vector_db\length.bin
+2025-03-19 13:03:02,485 - linkedin_scapper - INFO - Downloading vector_database/faiss/58eef994-e8a1-47a4-9029-50f172cd49cf/link_lists.bin to streamlit_app/db/vector_db\link_lists.bin
+2025-03-19 13:03:03,110 - linkedin_scapper - INFO - Downloading vector_database/faiss/chroma.sqlite3 to streamlit_app/db/vector_db\chroma.sqlite3
+2025-03-19 13:03:04,128 - linkedin_scapper - INFO - Downloading vector_database/faiss/index.faiss to streamlit_app/db/vector_db\index.faiss
+2025-03-19 13:03:04,805 - linkedin_scapper - INFO - Downloading vector_database/faiss/index.pkl to streamlit_app/db/vector_db\index.pkl
+2025-03-19 13:03:06,139 - linkedin_scapper - INFO - Downloaded BM25 retriever to streamlit_app/db\bm25.pkl
+2025-03-19 13:03:06,140 - linkedin_scapper - INFO - Loading FAISS index from streamlit_app/db/vector_db...
+2025-03-19 13:03:06,287 - linkedin_scapper - INFO - Vector database loaded successfully!
+2025-03-19 13:03:06,288 - linkedin_scapper - INFO - ChatHandler initialization complete!
+2025-03-19 13:03:06,288 - linkedin_scapper - INFO - Setting up retriever...
+2025-03-19 13:03:06,289 - linkedin_scapper - INFO - Loading BM25 retriever from streamlit_app/db\bm25.pkl
+2025-03-19 13:03:06,312 - linkedin_scapper - INFO - Hybrid retriever (BM25 + Vector) setup complete!
+2025-03-19 13:03:06,313 - linkedin_scapper - INFO - Retriever setup complete!
+2025-03-19 13:03:06,313 - linkedin_scapper - INFO - Setting is_ready to True. vector_db: True, retriever: True

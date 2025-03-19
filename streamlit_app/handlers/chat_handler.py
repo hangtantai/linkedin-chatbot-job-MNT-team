@@ -19,6 +19,7 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 # from langchain_chroma import Chroma
 import pickle
+import boto3
 from langchain.prompts import PromptTemplate
 from streamlit_app.utils.logger import logger
 # Initialize configuration
@@ -58,6 +59,85 @@ class ChatHandler:
         # Start background initialization
         threading.Thread(target=self._initialize_in_background, daemon=True).start()
 
+    # def _initialize_in_background(self):
+    #     """Initialize embeddings and vector database in a background thread"""
+    #     try:
+    #         with ChatHandler._initialization_lock:
+    #             if not ChatHandler._is_initialized:
+    #                 # Load embeddings
+    #                 if ChatHandler._embeddings is None:
+    #                     logger.info("Loading embeddings model...")
+    #                     try:
+    #                         ChatHandler._embeddings = HuggingFaceEmbeddings(
+    #                             model_name=model_name_vectordb,
+    #                             cache_folder=cache_folder
+    #                         )
+    #                         logger.info("Embeddings loaded successfully!")
+    #                     except Exception as e:
+    #                         logger.error(f"Error loading embeddings: {e}")
+    #                         raise
+                    
+    #                 # Load vector store
+    #                 if ChatHandler._vector_db is None:
+    #                     logger.info("Loading vector database...")
+    #                     ChatHandler._vector_db = self._load_vector_store()
+    #                     if ChatHandler._vector_db is None:
+    #                         logger.warning("WARNING: Vector database is None after loading!")
+    #                         # If vector database is None, we'll still mark as initialized but log a warning
+    #                         logger.warning("Continuing without vector database - chat functionality will be limited")
+    #                     else:
+    #                         logger.info("Vector database loaded successfully!")
+                    
+    #                 ChatHandler._is_initialized = True
+    #                 logger.info("ChatHandler initialization complete!")
+                
+    #             # Set instance variables
+    #             self.embeddings = ChatHandler._embeddings
+    #             self.vector_db = ChatHandler._vector_db
+                
+    #             # Always set is_ready to True even if vector_db is None
+    #             # This allows the application to proceed even with limited functionality
+    #             if self.vector_db is None:
+    #                 logger.warning("WARNING: self.vector_db is None! Chat will have limited functionality.")
+    #                 self.retriever = None
+    #             else:
+    #                 logger.info("Setting up retriever...")
+    #                 # Set up vector retriever
+    #                 vector_retriever = self.vector_db.as_retriever(search_kwargs={"k": 5})
+                    
+    #                 # Load hybrid retriever if BM25 file exists
+    #                 try:
+    #                     vector_db_path = config.get_config()["vector_db_path"]
+    #                     bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
+                        
+    #                     if os.path.exists(bm25_path):
+    #                         logger.info(f"Loading BM25 retriever from {bm25_path}")
+    #                         with open(bm25_path, "rb") as f:
+    #                             bm25_retriever = pickle.load(f)
+                                
+    #                         # Create ensemble retriever (hybrid search)
+    #                         self.retriever = EnsembleRetriever(
+    #                             retrievers=[bm25_retriever, vector_retriever],
+    #                             weights=[0.3, 0.7]  # Weight semantic search higher
+    #                         )
+    #                         logger.info("Hybrid retriever (BM25 + Vector) setup complete!")
+    #                     else:
+    #                         logger.info("BM25 retriever not found. Using vector retriever only.")
+    #                         self.retriever = vector_retriever
+    #                 except Exception as e:
+    #                     logger.error(f"Error setting up BM25 retriever: {e}, falling back to vector retriever")
+    #                     self.retriever = vector_retriever
+    #                 logger.info("Retriever setup complete!")
+                
+    #             logger.info(f"Setting is_ready to True. vector_db: {self.vector_db is not None}, retriever: {self.retriever is not None}")
+    #             self.is_ready = True
+    #     except Exception as e:
+    #         logger.error(f"Error during initialization: {e}")
+    #         # Don't set is_ready to True when there's an error
+    #         self.is_ready = False
+    #         # Add more detailed error information
+    #         self.initialization_error = str(e)
+
     def _initialize_in_background(self):
         """Initialize embeddings and vector database in a background thread"""
         try:
@@ -76,8 +156,56 @@ class ChatHandler:
                             logger.error(f"Error loading embeddings: {e}")
                             raise
                     
-                    # Load vector store
+                    # Download and load vector store from S3
                     if ChatHandler._vector_db is None:
+                        logger.info("Downloading vector database from S3...")
+                        
+                        # Download vector database files from S3
+                        vector_db_path = config.get_config()["vector_db_path"]
+                        bucket_name = "linkedin-job-vector-database"
+                        s3_prefix = "vector_database/faiss"
+                        
+                        # Create directory if it doesn't exist
+                        os.makedirs(vector_db_path, exist_ok=True)
+                        
+                        # Download FAISS files from S3
+                        try:
+                            s3_client = boto3.client("s3")
+                            logger.info(f"Downloading files from {bucket_name}/{s3_prefix} to {vector_db_path}")
+                            
+                            # List objects in the prefix
+                            response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix)
+                            
+                            if 'Contents' in response:
+                                for obj in response['Contents']:
+                                    s3_key = obj['Key']
+                                    # Extract relative path from the s3_key
+                                    rel_path = os.path.relpath(s3_key, s3_prefix)
+                                    local_path = os.path.join(vector_db_path, rel_path)
+                                    
+                                    # Create subdirectories if needed
+                                    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                                    
+                                    logger.info(f"Downloading {s3_key} to {local_path}")
+                                    s3_client.download_file(bucket_name, s3_key, local_path)
+                                
+                                logger.info("Vector database files downloaded successfully!")
+                                
+                                # Also download BM25 retriever
+                                try:
+                                    bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
+                                    s3_client.download_file(bucket_name, "vector_database/bm25.pkl", bm25_path)
+                                    logger.info(f"Downloaded BM25 retriever to {bm25_path}")
+                                except Exception as e:
+                                    logger.warning(f"Could not download BM25 retriever: {e}")
+                            else:
+                                logger.error(f"No files found in S3 at {bucket_name}/{s3_prefix}")
+                                
+                        except Exception as e:
+                            logger.error(f"Error downloading vector database from S3: {e}")
+                            # We'll continue and try to load from local path if files exist
+                        
+                        # Now load the vector database using the local files
                         logger.info("Loading vector database...")
                         ChatHandler._vector_db = self._load_vector_store()
                         if ChatHandler._vector_db is None:
@@ -90,6 +218,7 @@ class ChatHandler:
                     ChatHandler._is_initialized = True
                     logger.info("ChatHandler initialization complete!")
                 
+                # Rest of the method remains the same
                 # Set instance variables
                 self.embeddings = ChatHandler._embeddings
                 self.vector_db = ChatHandler._vector_db
@@ -137,16 +266,81 @@ class ChatHandler:
             # Add more detailed error information
             self.initialization_error = str(e)
 
+    # def _load_vector_store(self) -> Optional[FAISS]:
+    #     """Initialize and load FAISS vector store"""
+    #     try:
+    #         vector_db_path = config.get_config()["vector_db_path"]
+    #         index_faiss_path = os.path.join(vector_db_path, "index.faiss")
+    #         index_pkl_path = os.path.join(vector_db_path, "index.pkl")
+
+    #         # check 2 files exist
+    #         if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
+    #             logger.error("Vector database files not found! Please generate them first.")
+    #             return None
+            
+    #         logger.info(f"Loading FAISS index from {vector_db_path}...")
+
+    #         vector_db = FAISS.load_local(
+    #             folder_path=vector_db_path,
+    #             embeddings=self._embeddings,
+    #             allow_dangerous_deserialization=True
+    #         )
+    #         return vector_db
+    #     except Exception as e:
+    #         logger.error(f"Error loading FAISS: {e}")
+    #         return None
+    
     def _load_vector_store(self) -> Optional[FAISS]:
-        """Initialize and load FAISS vector store"""
+        """Initialize and load FAISS vector store from S3"""
         try:
             vector_db_path = config.get_config()["vector_db_path"]
+            bucket_name = "linkedin-job-vector-database"  # Use your S3 bucket name
+            s3_prefix = "vector_database/faiss"
+            
+            # Create local directory if it doesn't exist
+            os.makedirs(vector_db_path, exist_ok=True)
+            
+            # Download FAISS files from S3
+            logger.info(f"Downloading vector database files from S3 bucket {bucket_name}/{s3_prefix}...")
+            s3_client = boto3.client("s3")
+            
+            try:
+                # List all objects under the prefix
+                response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix)
+                
+                if 'Contents' not in response:
+                    logger.error(f"No files found in S3 at {bucket_name}/{s3_prefix}")
+                    return None
+                
+                # Download each file
+                for obj in response['Contents']:
+                    s3_key = obj['Key']
+                    local_file_path = os.path.join(vector_db_path, os.path.basename(s3_key))
+                    
+                    # Create directories for nested paths if needed
+                    os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+                    
+                    logger.info(f"Downloading {s3_key} to {local_file_path}")
+                    s3_client.download_file(bucket_name, s3_key, local_file_path)
+                
+                # Also download BM25 retriever
+                try:
+                    bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
+                    s3_client.download_file(bucket_name, "vector_database/bm25.pkl", bm25_path)
+                    logger.info(f"Downloaded BM25 retriever to {bm25_path}")
+                except Exception as e:
+                    logger.warning(f"Could not download BM25 retriever: {e}")
+            
+            except Exception as e:
+                logger.error(f"Error downloading files from S3: {e}")
+                return None
+            
+            # Now check if the required files are present
             index_faiss_path = os.path.join(vector_db_path, "index.faiss")
             index_pkl_path = os.path.join(vector_db_path, "index.pkl")
 
-            # check 2 files exist
             if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
-                logger.error("Vector database files not found! Please generate them first.")
+                logger.error(f"Required vector database files not found after download: {index_faiss_path}, {index_pkl_path}")
                 return None
             
             logger.info(f"Loading FAISS index from {vector_db_path}...")
@@ -159,6 +353,8 @@ class ChatHandler:
             return vector_db
         except Exception as e:
             logger.error(f"Error loading FAISS: {e}")
+            import traceback
+            traceback.print_exc()
             return None
 
     # def _load_vector_store(self) -> Optional[Chroma]:
