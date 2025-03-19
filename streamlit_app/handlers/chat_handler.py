@@ -16,8 +16,8 @@ if "mnt" in os.getcwd():
 from streamlit_app.utils.config import Config
 from streamlit_app.utils.utils_chat import check_token_limit
 from langchain_huggingface import HuggingFaceEmbeddings
-# from langchain_community.vectorstores import FAISS
-from langchain_chroma import Chroma
+from langchain_community.vectorstores import FAISS
+# from langchain_chroma import Chroma
 import pickle
 from langchain.prompts import PromptTemplate
 from streamlit_app.utils.logger import logger
@@ -137,60 +137,60 @@ class ChatHandler:
             # Add more detailed error information
             self.initialization_error = str(e)
 
-    # def _load_vector_store(self) -> Optional[FAISS]:
-    #     """Initialize and load FAISS vector store"""
-    #     try:
-    #         vector_db_path = config.get_config()["vector_db_path"]
-    #         index_faiss_path = os.path.join(vector_db_path, "index.faiss")
-    #         index_pkl_path = os.path.join(vector_db_path, "index.pkl")
-
-    #         # check 2 files exist
-    #         if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
-    #             logger.error("Vector database files not found! Please generate them first.")
-    #             return None
-            
-    #         logger.info(f"Loading FAISS index from {vector_db_path}...")
-
-    #         vector_db = FAISS.load_local(
-    #             folder_path=vector_db_path,
-    #             embeddings=self._embeddings,
-    #             allow_dangerous_deserialization=True
-    #         )
-    #         return vector_db
-    #     except Exception as e:
-    #         logger.error(f"Error loading FAISS: {e}")
-    #         return None
-
-    def _load_vector_store(self) -> Optional[Chroma]:
-        """Initialize and load Chroma vector store"""
+    def _load_vector_store(self) -> Optional[FAISS]:
+        """Initialize and load FAISS vector store"""
         try:
             vector_db_path = config.get_config()["vector_db_path"]
+            index_faiss_path = os.path.join(vector_db_path, "index.faiss")
+            index_pkl_path = os.path.join(vector_db_path, "index.pkl")
 
-            # Check if directory exists
-            if not os.path.exists(vector_db_path) or not os.path.isdir(vector_db_path):
-                logger.error(f"Chroma directory not found at {vector_db_path}!")
+            # check 2 files exist
+            if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
+                logger.error("Vector database files not found! Please generate them first.")
                 return None
             
-            # Look for Chroma files
-            chroma_files = [f for f in os.listdir(vector_db_path) if f.endswith('.sqlite3') or f.endswith('.parquet')]
-            if not chroma_files:
-                logger.error(f"No Chroma database files found in {vector_db_path}. Please generate them first.")
-                return None
-            
-            logger.info(f"Loading Chroma from {vector_db_path}...")
-            
-            # Load Chroma database
-            vector_db = Chroma(
-                persist_directory=vector_db_path,
-                embedding_function=self._embeddings
+            logger.info(f"Loading FAISS index from {vector_db_path}...")
+
+            vector_db = FAISS.load_local(
+                folder_path=vector_db_path,
+                embeddings=self._embeddings,
+                allow_dangerous_deserialization=True
             )
-            
             return vector_db
         except Exception as e:
-            logger.error(f"Error loading Chroma: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Error loading FAISS: {e}")
             return None
+
+    # def _load_vector_store(self) -> Optional[Chroma]:
+    #     """Initialize and load Chroma vector store"""
+    #     try:
+    #         vector_db_path = config.get_config()["vector_db_path"]
+
+    #         # Check if directory exists
+    #         if not os.path.exists(vector_db_path) or not os.path.isdir(vector_db_path):
+    #             logger.error(f"Chroma directory not found at {vector_db_path}!")
+    #             return None
+            
+    #         # Look for Chroma files
+    #         chroma_files = [f for f in os.listdir(vector_db_path) if f.endswith('.sqlite3') or f.endswith('.parquet')]
+    #         if not chroma_files:
+    #             logger.error(f"No Chroma database files found in {vector_db_path}. Please generate them first.")
+    #             return None
+            
+    #         logger.info(f"Loading Chroma from {vector_db_path}...")
+            
+    #         # Load Chroma database
+    #         vector_db = Chroma(
+    #             persist_directory=vector_db_path,
+    #             embedding_function=self._embeddings
+    #         )
+            
+    #         return vector_db
+    #     except Exception as e:
+    #         logger.error(f"Error loading Chroma: {e}")
+    #         import traceback
+    #         traceback.print_exc()
+    #         return None
         
     def retrieve_qa(self, query) -> str:
         """
