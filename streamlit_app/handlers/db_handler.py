@@ -1,24 +1,29 @@
+# import necessary file
 import streamlit as st
-from pymongo import MongoClient 
-import os
 import sys
+import os
+from pymongo import MongoClient 
 # Check if running on Streamlit Cloud
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 
+# import external file
 from streamlit_app.utils.config import Config
 
 # Intilize configuration
 config = Config()
 config.initialize_session_states()
-
 # Variables
-db_uri = st.secrets["MONGO_URI"]
+db_uri = config.get_config()["db_uri"]
 default_title = config.get_config()["default_name"]
 max_word = config.get_config()["max_word"]
 
+
 class DBHandler:
+    """
+    Connect to Mongo Atlas to manage history
+    """
     def __init__(self):
         self.mongo_client = MongoClient(db_uri)
         self.db = self.mongo_client['chatbot']
@@ -129,7 +134,7 @@ class DBHandler:
         messages = chat.get("messages", [])
         if messages:
             first_message = messages[0].get("content", "")
-            words = first_message.split()[:15]
+            words = first_message.split()[:max_word]
             title = " ".join(words)
             if len(words) < len(first_message.split()):
                 title += "..."

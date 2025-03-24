@@ -22,3 +22,4 @@ streamlit_app/db/vector_db/index.pkl
 streamlit_app/db/bm25.pkl
 streamlit_app/db/vector_db/models--sentence-transformers--all-MiniLM-L6-v2/*
 web_scrapping/utils/logs/*
+streamlit_app/utils/logs/*
