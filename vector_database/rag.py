@@ -4,24 +4,41 @@ import pickle
 import pandas as pd
 import streamlit as st
 from io import StringIO 
+import sys
+import boto3
+import shutil
 # Document and Splitter
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 # Embeddings
 from langchain_huggingface import HuggingFaceEmbeddings
 # Vector Store
-from langchain_community.vectorstores import FAISS
-# from langchain_chroma import Chroma 
-# QNA
-from streamlit_app.utils.config import Config
+from langchain_community.vectorstores import FAISS 
 # Hybrid Search components
 from langchain_community.retrievers import BM25Retriever
-# Database
-import boto3
-import shutil
+# Check if running on Streamlit Cloud
+if "mnt" in os.getcwd():
+    os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
+    sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
+# QNA
+from streamlit_app.utils.config import Config
 
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
+
+# Variables
+config = Config().get_config()
+chunk_size = config["chunk_size"]
+chunk_overlap = config["chunk_overlap"]
+bucket_vectordb = config["bucket_vectordb"]
+prefix = config["prefix_vectodb"]
+batch_size = config["batch_size"]
+device = config["device"]
+distance = config["distance"]
+normal_embeddings = config["normal_embeddings"]
+s3_key_bm25 = config["s3_key"]
+bm25_file = config["bm25_file"]
+bucket_job = config["bucket_job"]
 
 def load_documents(df: pd.DataFrame) -> list:
     """
@@ -54,7 +71,7 @@ def load_documents(df: pd.DataFrame) -> list:
     ]
     return documents
 
-def chunk_text(documents: list, chunk_size: int = 1000, chunk_overlap: int = 100) -> list:
+def chunk_text(documents: list, chunk_size: int = chunk_size, chunk_overlap: int = chunk_overlap) -> list:
     """
     Split large documents into smaller chunks for better processing and embedding.
 
@@ -98,7 +115,7 @@ def upload_directory_to_s3(local_directory, bucket, s3_prefix):
             s3_client.upload_file(local_path, bucket, s3_key)
 
 
-def embed_and_store(model_name: str, doc_chunks: list, db_path: str, device: str = "cpu", batch_size: int = 32, normal_embeddings: bool = True, distance: str = "COSINE"):
+def embed_and_store(model_name: str, doc_chunks: list, db_path: str, device: str = device, batch_size: int = batch_size, normal_embeddings: bool = normal_embeddings, distance: str = distance):
     """
     Embed the document chunks and store them in a vector database (FAISS).
 
@@ -124,9 +141,9 @@ def embed_and_store(model_name: str, doc_chunks: list, db_path: str, device: str
     )
     vector_db.save_local(db_path)
      # Upload to S3
-    bucket_name = "linkedin-job-vector-database"  # Use the same bucket name here
-    upload_directory_to_s3(db_path, bucket_name, "vector_database/faiss")
-    print(f"Uploaded FAISS database to S3 bucket: {bucket_name}/vector_database/faiss")
+    bucket_name = bucket_vectordb  # Use the same bucket name here
+    upload_directory_to_s3(db_path, bucket_vectordb, prefix)
+    print(f"Uploaded FAISS database to S3 bucket: {bucket_vectordb}/{prefix}")
     
     return vector_db
 
@@ -147,19 +164,18 @@ def save_bm25_retriever(doc_chunks, db_path):
     bm25_retriever.k = 5
     
     # Save BM25 retriever for future use
-    bm25_path = os.path.join(os.path.dirname(db_path), "bm25.pkl")
+    bm25_path = os.path.join(os.path.dirname(db_path), bm25_file)
     try:
         with open(bm25_path, "wb") as f:
             pickle.dump(bm25_retriever, f)
         print(f"Saved BM25 retriever to {bm25_path}")
          
         # Upload to S3
-        bucket_name = "linkedin-job-vector-database"  # Change to your preferred bucket name
-        s3_key = "vector_database/bm25.pkl"
+        bucket_name = bucket_vectordb  # Change to your preferred bucket name
         s3_client = boto3.client("s3")
-        s3_client.upload_file(bm25_path, bucket_name, s3_key)  # Fix: use bm25_path instead of db_path
+        s3_client.upload_file(bm25_path, bucket_name, s3_key_bm25)  # Fix: use bm25_path instead of db_path
         
-        print(f"Saved BM25 retriever to S3: s3://{bucket_name}/{s3_key}")
+        print(f"Saved BM25 retriever to S3: s3://{bucket_vectordb}/{s3_key_bm25}")
         return bm25_path
     except Exception as e:
         print(f"Failed to save BM25 retriever: {e}")
@@ -180,11 +196,11 @@ def check_and_prepare_paths(db_path: str):
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     
     # Define paths
-    bm25_path = os.path.join(os.path.dirname(db_path), "bm25.pkl")
+    bm25_path = os.path.join(os.path.dirname(db_path), bm25_file)
     
     # Check if directory exists
     if os.path.exists(db_path) and os.path.isdir(db_path):
-        print(f"Found existing Chroma directory: {db_path} (will be overwritten)")
+        print(f"Found existing FAISS directory: {db_path} (will be overwritten)")
         try:
             # Remove the entire directory
             shutil.rmtree(db_path)
@@ -215,7 +231,7 @@ def main():
     # Connect to database and fetch data
     # Read file from s3 
     s3_client = boto3.client("s3")
-    response = s3_client.get_object(Bucket=st.secrets["S3_BUCKET_JOB"], Key = "job_data.csv")
+    response = s3_client.get_object(Bucket=bucket_job, Key = "job_data.csv")
     content = response["Body"].read().decode("utf-8")
 
     # convert content into Data Frame
@@ -227,7 +243,7 @@ def main():
     doc_chunks = chunk_text(documents)
     print(f"Created {len(doc_chunks)} document chunks")
     
-    # Create and save vector database using Chroma
+    # Create and save vector database using FAISS
     print("Creating FAISS vector database...")
     vector_db = embed_and_store(
         model_name=config["model_name_vectordb"],
@@ -240,7 +256,6 @@ def main():
     print("Creating BM25 retriever...")
     bm25_path = save_bm25_retriever(doc_chunks, db_path)
     print(f"Created BM25 retriever at {bm25_path}")
-    
     print("\nRAG system setup complete with FAISS!")
 
 # Run main to build the database and hybrid search

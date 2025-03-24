@@ -1,7 +1,7 @@
-import streamlit as st
-from bson.objectid import ObjectId
 import os
 import sys
+import streamlit as st
+from bson.objectid import ObjectId
 # Check if running on Streamlit Cloud
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
@@ -14,7 +14,7 @@ from streamlit_app.handlers.chat_handler import ChatHandler
 from streamlit_app.handlers.session_handler import SessionHandler
 from streamlit_app.helpers.processing_text import escape_for_js
 from streamlit_app.handlers.style_loader_handler import StyleLoader
-
+from streamlit_app.helpers.check_initialization_status import check_initialization_status
 # Initialize configuration
 config = Config()
 config.initialize_session_states()
@@ -56,28 +56,12 @@ StyleLoader.load_css([
 ])
 StyleLoader.load_js([
     config.get_config()["folder_js"],
-    "streamlit_app/static/scripts.js"  # Load external JS
+    "streamlit_app/static/scripts.js"  # Load external JavaScripts
 ])
 
 # Intilize chat handler
 if 'handler_initialized' not in st.session_state:
     st.session_state.handler_initialized = False
-
-# Create a status check function
-def check_initialization_status():
-    # Get the chat handler from session state
-    chat_handler = st.session_state.chat_handler
-    
-    # Check if initialization status has changed
-    if chat_handler.is_ready and not st.session_state.handler_initialized:
-        print("Chat handler is now ready! Setting handler_initialized to True")
-        st.session_state.handler_initialized = True
-        # We'll use JavaScript to reload instead of st.rerun()
-        return True
-    
-    # Add debug information
-    print(f"Checking initialization status: is_ready={chat_handler.is_ready}, handler_initialized={st.session_state.handler_initialized}")
-    return False
 
 # Initialize chat handler (this won't block now)
 if 'chat_handler' not in st.session_state:
@@ -190,8 +174,9 @@ else:
                 del st.session_state.chat_handler
             st.rerun()
 
+
 # Main chat area
-# Update the message display section
+# Update the message display section: sho history chat
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         if message["role"] == "assistant":
@@ -272,6 +257,12 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
                 current_chat_id = ObjectId(st.session_state.chat_id)
                 db_handler.update_chat_messages(current_chat_id, {"role": "user", "content": user_message})
                 db_handler.update_chat_messages(current_chat_id, {"role": "assistant", "content": response_content})
+
         except Exception as e:
             st.error(f"Error generating response: {str(e)}")
             st.session_state.messages.append({"role": "assistant", "content": f"Sorry, I encountered an error: {str(e)}"})
+
+
+# fore-rerun ?: check rerun if rerun is True -> del chat handler to restart the program
+# switching chat ?: check to skip unnecessary reinitlization and UI rendering
+# rerun ?: press button

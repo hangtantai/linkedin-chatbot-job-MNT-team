@@ -3,6 +3,16 @@ from bson.objectid import ObjectId
 from typing import Callable
 from pymongo.collection import Collection
 class SidebarComponent:
+    """
+    Rendering sidebar component of the program
+
+    Args:
+        chat_collection: to show history chat
+        create_new_chat: button create new chat
+        switch_chat: switch chat to render
+        get_chat_title: to show onto sidebar
+        show_rename: function to rename chat history
+    """
     def __init__(self, 
                  chat_collection: Collection,
                  create_new_chat: Callable,

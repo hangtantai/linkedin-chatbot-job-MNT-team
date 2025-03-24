@@ -1,27 +1,26 @@
-from langchain_groq import ChatGroq
-import streamlit as st
-import time
-from typing import List, Dict, Any, Optional
+# import necessary library
 import os
 import sys
 import tiktoken
-from langchain.chains import RetrievalQA
 import threading
+import streamlit as st
+from typing import  Any
+from langchain.chains import RetrievalQA
+from langchain_groq import ChatGroq
+from langchain.prompts import PromptTemplate
 from langchain.retrievers import EnsembleRetriever
 # Check if running on Streamlit Cloud
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
 
+# import external file
 from streamlit_app.utils.config import Config
-from streamlit_app.utils.utils_chat import check_token_limit
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.vectorstores import FAISS
-# from langchain_chroma import Chroma
-import pickle
-import boto3
-from langchain.prompts import PromptTemplate
 from streamlit_app.utils.logger import logger
+from streamlit_app.handlers.chat_modules.vector_db_handler import VectorDBHandler
+from streamlit_app.handlers.chat_modules.retriever_handler import RetrieverHandler
+from streamlit_app.handlers.chat_modules.response_formatter import ResponseFormatter
+
 # Initialize configuration
 config = Config()
 api_key = st.secrets["GROQ_API_KEY"]
@@ -41,7 +40,18 @@ cache_folder = config.get_config()["cache_folder"]
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 os.environ["PYTHONPATH"] = os.path.dirname(os.path.abspath(__file__))
+
 class ChatHandler:
+    """
+    Initlize Chat Handler instance to handle chatbot
+
+    Args:
+        embedding model: to convert text into vector database
+        vectordb: FAISS vectordb
+        llm: model AI
+        _is_initialized: to check chat handler is initlized
+        _initialization_lock: check chat bar is still lock
+    """
     _embeddings = None
     _vector_db = None
     _is_initialized = False
@@ -55,88 +65,14 @@ class ChatHandler:
 
         # Set initialization flags
         self.is_ready = False
+
+        # Create helpers object
+        self.vector_db_handler = VectorDBHandler(model_name_vectordb, cache_folder)
+        self.retriever_handler = RetrieverHandler()
+        self.response_formatter = ResponseFormatter()
         
         # Start background initialization
         threading.Thread(target=self._initialize_in_background, daemon=True).start()
-
-    # def _initialize_in_background(self):
-    #     """Initialize embeddings and vector database in a background thread"""
-    #     try:
-    #         with ChatHandler._initialization_lock:
-    #             if not ChatHandler._is_initialized:
-    #                 # Load embeddings
-    #                 if ChatHandler._embeddings is None:
-    #                     logger.info("Loading embeddings model...")
-    #                     try:
-    #                         ChatHandler._embeddings = HuggingFaceEmbeddings(
-    #                             model_name=model_name_vectordb,
-    #                             cache_folder=cache_folder
-    #                         )
-    #                         logger.info("Embeddings loaded successfully!")
-    #                     except Exception as e:
-    #                         logger.error(f"Error loading embeddings: {e}")
-    #                         raise
-                    
-    #                 # Load vector store
-    #                 if ChatHandler._vector_db is None:
-    #                     logger.info("Loading vector database...")
-    #                     ChatHandler._vector_db = self._load_vector_store()
-    #                     if ChatHandler._vector_db is None:
-    #                         logger.warning("WARNING: Vector database is None after loading!")
-    #                         # If vector database is None, we'll still mark as initialized but log a warning
-    #                         logger.warning("Continuing without vector database - chat functionality will be limited")
-    #                     else:
-    #                         logger.info("Vector database loaded successfully!")
-                    
-    #                 ChatHandler._is_initialized = True
-    #                 logger.info("ChatHandler initialization complete!")
-                
-    #             # Set instance variables
-    #             self.embeddings = ChatHandler._embeddings
-    #             self.vector_db = ChatHandler._vector_db
-                
-    #             # Always set is_ready to True even if vector_db is None
-    #             # This allows the application to proceed even with limited functionality
-    #             if self.vector_db is None:
-    #                 logger.warning("WARNING: self.vector_db is None! Chat will have limited functionality.")
-    #                 self.retriever = None
-    #             else:
-    #                 logger.info("Setting up retriever...")
-    #                 # Set up vector retriever
-    #                 vector_retriever = self.vector_db.as_retriever(search_kwargs={"k": 5})
-                    
-    #                 # Load hybrid retriever if BM25 file exists
-    #                 try:
-    #                     vector_db_path = config.get_config()["vector_db_path"]
-    #                     bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
-                        
-    #                     if os.path.exists(bm25_path):
-    #                         logger.info(f"Loading BM25 retriever from {bm25_path}")
-    #                         with open(bm25_path, "rb") as f:
-    #                             bm25_retriever = pickle.load(f)
-                                
-    #                         # Create ensemble retriever (hybrid search)
-    #                         self.retriever = EnsembleRetriever(
-    #                             retrievers=[bm25_retriever, vector_retriever],
-    #                             weights=[0.3, 0.7]  # Weight semantic search higher
-    #                         )
-    #                         logger.info("Hybrid retriever (BM25 + Vector) setup complete!")
-    #                     else:
-    #                         logger.info("BM25 retriever not found. Using vector retriever only.")
-    #                         self.retriever = vector_retriever
-    #                 except Exception as e:
-    #                     logger.error(f"Error setting up BM25 retriever: {e}, falling back to vector retriever")
-    #                     self.retriever = vector_retriever
-    #                 logger.info("Retriever setup complete!")
-                
-    #             logger.info(f"Setting is_ready to True. vector_db: {self.vector_db is not None}, retriever: {self.retriever is not None}")
-    #             self.is_ready = True
-    #     except Exception as e:
-    #         logger.error(f"Error during initialization: {e}")
-    #         # Don't set is_ready to True when there's an error
-    #         self.is_ready = False
-    #         # Add more detailed error information
-    #         self.initialization_error = str(e)
 
     def _initialize_in_background(self):
         """Initialize embeddings and vector database in a background thread"""
@@ -147,10 +83,7 @@ class ChatHandler:
                     if ChatHandler._embeddings is None:
                         logger.info("Loading embeddings model...")
                         try:
-                            ChatHandler._embeddings = HuggingFaceEmbeddings(
-                                model_name=model_name_vectordb,
-                                cache_folder=cache_folder
-                            )
+                            ChatHandler._embeddings = self.vector_db_handler.load_embeddings()
                             logger.info("Embeddings loaded successfully!")
                         except Exception as e:
                             logger.error(f"Error loading embeddings: {e}")
@@ -161,64 +94,16 @@ class ChatHandler:
                         logger.info("Downloading vector database from S3...")
                         
                         # Download vector database files from S3
-                        vector_db_path = config.get_config()["vector_db_path"]
-                        bucket_name = "linkedin-job-vector-database"
-                        s3_prefix = "vector_database/faiss"
-                        
-                        # Create directory if it doesn't exist
-                        os.makedirs(vector_db_path, exist_ok=True)
-                        
-                        # Download FAISS files from S3
-                        try:
-                            s3_client = boto3.client("s3")
-                            logger.info(f"Downloading files from {bucket_name}/{s3_prefix} to {vector_db_path}")
-                            
-                            # List objects in the prefix
-                            response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix)
-                            
-                            if 'Contents' in response:
-                                for obj in response['Contents']:
-                                    s3_key = obj['Key']
-                                    # Extract relative path from the s3_key
-                                    rel_path = os.path.relpath(s3_key, s3_prefix)
-                                    local_path = os.path.join(vector_db_path, rel_path)
-                                    
-                                    # Create subdirectories if needed
-                                    os.makedirs(os.path.dirname(local_path), exist_ok=True)
-                                    
-                                    logger.info(f"Downloading {s3_key} to {local_path}")
-                                    s3_client.download_file(bucket_name, s3_key, local_path)
-                                
-                                logger.info("Vector database files downloaded successfully!")
-                                
-                                # Also download BM25 retriever
-                                try:
-                                    bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
-                                    s3_client.download_file(bucket_name, "vector_database/bm25.pkl", bm25_path)
-                                    logger.info(f"Downloaded BM25 retriever to {bm25_path}")
-                                except Exception as e:
-                                    logger.warning(f"Could not download BM25 retriever: {e}")
-                            else:
-                                logger.error(f"No files found in S3 at {bucket_name}/{s3_prefix}")
-                                
-                        except Exception as e:
-                            logger.error(f"Error downloading vector database from S3: {e}")
-                            # We'll continue and try to load from local path if files exist
-                        
-                        # Now load the vector database using the local files
-                        logger.info("Loading vector database...")
-                        ChatHandler._vector_db = self._load_vector_store()
+                        ChatHandler._vector_db = self.vector_db_handler.download_and_load_vector_db()
                         if ChatHandler._vector_db is None:
-                            logger.warning("WARNING: Vector database is None after loading!")
-                            # If vector database is None, we'll still mark as initialized but log a warning
+                            logger.warning("WARNING: Vector database is None after downloading!")
                             logger.warning("Continuing without vector database - chat functionality will be limited")
                         else:
-                            logger.info("Vector database loaded successfully!")
+                            logger.info("Vector database downloaded successfully!")
                     
                     ChatHandler._is_initialized = True
                     logger.info("ChatHandler initialization complete!")
                 
-                # Rest of the method remains the same
                 # Set instance variables
                 self.embeddings = ChatHandler._embeddings
                 self.vector_db = ChatHandler._vector_db
@@ -231,30 +116,7 @@ class ChatHandler:
                 else:
                     logger.info("Setting up retriever...")
                     # Set up vector retriever
-                    vector_retriever = self.vector_db.as_retriever(search_kwargs={"k": 5})
-                    
-                    # Load hybrid retriever if BM25 file exists
-                    try:
-                        vector_db_path = config.get_config()["vector_db_path"]
-                        bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
-                        
-                        if os.path.exists(bm25_path):
-                            logger.info(f"Loading BM25 retriever from {bm25_path}")
-                            with open(bm25_path, "rb") as f:
-                                bm25_retriever = pickle.load(f)
-                                
-                            # Create ensemble retriever (hybrid search)
-                            self.retriever = EnsembleRetriever(
-                                retrievers=[bm25_retriever, vector_retriever],
-                                weights=[0.3, 0.7]  # Weight semantic search higher
-                            )
-                            logger.info("Hybrid retriever (BM25 + Vector) setup complete!")
-                        else:
-                            logger.info("BM25 retriever not found. Using vector retriever only.")
-                            self.retriever = vector_retriever
-                    except Exception as e:
-                        logger.error(f"Error setting up BM25 retriever: {e}, falling back to vector retriever")
-                        self.retriever = vector_retriever
+                    self.retriever = self.retriever_handler.set_up_retriever(self.vector_db)
                     logger.info("Retriever setup complete!")
                 
                 logger.info(f"Setting is_ready to True. vector_db: {self.vector_db is not None}, retriever: {self.retriever is not None}")
@@ -266,128 +128,6 @@ class ChatHandler:
             # Add more detailed error information
             self.initialization_error = str(e)
 
-    # def _load_vector_store(self) -> Optional[FAISS]:
-    #     """Initialize and load FAISS vector store"""
-    #     try:
-    #         vector_db_path = config.get_config()["vector_db_path"]
-    #         index_faiss_path = os.path.join(vector_db_path, "index.faiss")
-    #         index_pkl_path = os.path.join(vector_db_path, "index.pkl")
-
-    #         # check 2 files exist
-    #         if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
-    #             logger.error("Vector database files not found! Please generate them first.")
-    #             return None
-            
-    #         logger.info(f"Loading FAISS index from {vector_db_path}...")
-
-    #         vector_db = FAISS.load_local(
-    #             folder_path=vector_db_path,
-    #             embeddings=self._embeddings,
-    #             allow_dangerous_deserialization=True
-    #         )
-    #         return vector_db
-    #     except Exception as e:
-    #         logger.error(f"Error loading FAISS: {e}")
-    #         return None
-    
-    def _load_vector_store(self) -> Optional[FAISS]:
-        """Initialize and load FAISS vector store from S3"""
-        try:
-            vector_db_path = config.get_config()["vector_db_path"]
-            bucket_name = "linkedin-job-vector-database"  # Use your S3 bucket name
-            s3_prefix = "vector_database/faiss"
-            
-            # Create local directory if it doesn't exist
-            os.makedirs(vector_db_path, exist_ok=True)
-            
-            # Download FAISS files from S3
-            logger.info(f"Downloading vector database files from S3 bucket {bucket_name}/{s3_prefix}...")
-            s3_client = boto3.client("s3")
-            
-            try:
-                # List all objects under the prefix
-                response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix)
-                
-                if 'Contents' not in response:
-                    logger.error(f"No files found in S3 at {bucket_name}/{s3_prefix}")
-                    return None
-                
-                # Download each file
-                for obj in response['Contents']:
-                    s3_key = obj['Key']
-                    local_file_path = os.path.join(vector_db_path, os.path.basename(s3_key))
-                    
-                    # Create directories for nested paths if needed
-                    os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
-                    
-                    logger.info(f"Downloading {s3_key} to {local_file_path}")
-                    s3_client.download_file(bucket_name, s3_key, local_file_path)
-                
-                # Also download BM25 retriever
-                try:
-                    bm25_path = os.path.join(os.path.dirname(vector_db_path), "bm25.pkl")
-                    s3_client.download_file(bucket_name, "vector_database/bm25.pkl", bm25_path)
-                    logger.info(f"Downloaded BM25 retriever to {bm25_path}")
-                except Exception as e:
-                    logger.warning(f"Could not download BM25 retriever: {e}")
-            
-            except Exception as e:
-                logger.error(f"Error downloading files from S3: {e}")
-                return None
-            
-            # Now check if the required files are present
-            index_faiss_path = os.path.join(vector_db_path, "index.faiss")
-            index_pkl_path = os.path.join(vector_db_path, "index.pkl")
-
-            if not os.path.exists(index_faiss_path) or not os.path.exists(index_pkl_path):
-                logger.error(f"Required vector database files not found after download: {index_faiss_path}, {index_pkl_path}")
-                return None
-            
-            logger.info(f"Loading FAISS index from {vector_db_path}...")
-
-            vector_db = FAISS.load_local(
-                folder_path=vector_db_path,
-                embeddings=self._embeddings,
-                allow_dangerous_deserialization=True
-            )
-            return vector_db
-        except Exception as e:
-            logger.error(f"Error loading FAISS: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-
-    # def _load_vector_store(self) -> Optional[Chroma]:
-    #     """Initialize and load Chroma vector store"""
-    #     try:
-    #         vector_db_path = config.get_config()["vector_db_path"]
-
-    #         # Check if directory exists
-    #         if not os.path.exists(vector_db_path) or not os.path.isdir(vector_db_path):
-    #             logger.error(f"Chroma directory not found at {vector_db_path}!")
-    #             return None
-            
-    #         # Look for Chroma files
-    #         chroma_files = [f for f in os.listdir(vector_db_path) if f.endswith('.sqlite3') or f.endswith('.parquet')]
-    #         if not chroma_files:
-    #             logger.error(f"No Chroma database files found in {vector_db_path}. Please generate them first.")
-    #             return None
-            
-    #         logger.info(f"Loading Chroma from {vector_db_path}...")
-            
-    #         # Load Chroma database
-    #         vector_db = Chroma(
-    #             persist_directory=vector_db_path,
-    #             embedding_function=self._embeddings
-    #         )
-            
-    #         return vector_db
-    #     except Exception as e:
-    #         logger.error(f"Error loading Chroma: {e}")
-    #         import traceback
-    #         traceback.print_exc()
-    #         return None
-        
     def retrieve_qa(self, query) -> str:
         """
         Use the retriever to run a question-answering chain based on retrieved documents.
@@ -436,12 +176,9 @@ class ChatHandler:
 
             # Run query with full response
             logger.info("Running hybrid search query...")
-            # result = qa_chain.invoke({"query": query})
-            # return result["result"]
             try:
                 result = qa_chain.invoke({"query": query})
                 logger.info(f"Successfully retrieved answer with {len(result.get('source_documents', []))} source documents")
-                # result = qa_chain.invoke({"query": query})
                 # Log the source documents for debugging
                 if "source_documents" in result and result["source_documents"]:
                     for i, doc in enumerate(result["source_documents"][:2]):  # Show first 2 docs
@@ -463,59 +200,6 @@ class ChatHandler:
         except Exception as e:
             logger.error(f"Error in retrieve_qa: {str(e)}")
             st.error(f"Error in retrieve_qa: {str(e)}")
-            
-    
-    def filter_messages(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
-        """
-        Filter messages from chat history, placing user messages at the end
-        
-        Args:
-            messages (List[Dict[str, str]]): List of message dictionaries
-        
-        Returns:
-            List[Dict[str, str]]: Filtered messages with user messages at the end
-        """
-        try:
-            # Get assistant messages first
-            result_filter = []
-            assistant_messages = [msg for msg in messages if msg["role"] == "assistant"]
-            user_messages = [msg for msg in messages if msg["role"] == "user"]
-            
-            # Add last N assistant messages if they exist
-            if assistant_messages:
-                result_filter.extend(assistant_messages[-assistant_message_row:])
-            
-            # Add user messages at the end
-            result_filter.extend(user_messages)
-            
-            return result_filter
-        except Exception as e:
-            st.error(f"Error filtering messages: {str(e)}")
-            return []
-    
-    def generate_response(self, messages: List[Dict[str, str]]) -> str:
-        """
-        Generate response using the chat model
-        
-        Args:
-            messages (List[Dict[str, str]]): List of message dictionaries with 'role' and 'content'
-        
-        Returns:
-            str: Generated response
-        """
-        try:
-            if not check_token_limit(max_tokens_var, self.encoding, messages):
-                st.error(f"Message length exceeds token limit of {self.max_tokens}")
-                return None
-            
-            response = self.llm.invoke(
-                input=messages,
-                max_tokens=self.max_tokens
-            )
-            return response.content
-        except Exception as e:
-            st.error(f"Error generating response: {str(e)}")
-            return None
     
     def stream_response(self, response: str, placeholder: Any) -> None:
         """
@@ -526,256 +210,7 @@ class ChatHandler:
             placeholder: Streamlit placeholder for displaying response
         """
         try:
-            if not response:
-                placeholder.markdown("No response generated.")
-                return
-            
-            import re
-            
-            def process_markdown(text):
-                """Process markdown syntax to HTML for better rendering"""
-                # Bold text
-                text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
-                
-                # Italic text 
-                text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
-                
-                # Headers
-                text = re.sub(r'^# (.*?)$', r'<h1>\1</h1>', text, flags=re.MULTILINE)
-                text = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', text, flags=re.MULTILINE)
-                text = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', text, flags=re.MULTILINE)
-                
-                # Numbered lists
-                text = re.sub(r'^(\d+)\. (.*?)$', r'<ol start="\1"><li>\2</li></ol>', text, flags=re.MULTILINE)
-                
-                # Bullet lists
-                text = re.sub(r'^- (.*?)$', r'<li>\1</li>', text, flags=re.MULTILINE)
-                
-                # Consolidate consecutive list items
-                text = re.sub(r'<\/li><\/ol>\s*<ol start="\d+"><li>', r'</li><li>', text)
-                text = re.sub(r'<\/li>\s*<li>', r'</li><li>', text)
-                
-                # Wrap bullet lists in <ul> tags
-                parts = text.split('<li>')
-                result = parts[0]
-                in_list = False
-                
-                for part in parts[1:]:
-                    if not in_list:
-                        result += '<ul><li>' + part
-                        in_list = True
-                    else:
-                        if '</li>' in part and not re.search(r'<li>.*?</li>', part):
-                            result += '</ul>' + part
-                            in_list = False
-                        else:
-                            result += '<li>' + part
-                
-                # Code blocks
-                text = result
-                text = re.sub(r'```(\w+)?\n(.*?)```', r'<pre><code class="language-\1">\2</code></pre>', text, flags=re.DOTALL)
-                
-                # Inline code
-                text = re.sub(r'`(.*?)`', r'<code>\1</code>', text)
-                
-                return text
-                    
-            full_response = ""
-            # Stream by words for smoother effect
-            words = response.split()
-            for i, word in enumerate(words):
-                full_response += word + " "
-                time.sleep(self.time_sleep)
-                
-                # Apply markdown processing
-                formatted_html = process_markdown(full_response)
-                
-                # Use formatted HTML with proper styling
-                placeholder.markdown(
-                    f"""
-                    <div class="markdown-content">
-                        {formatted_html}<span class="cursor">▌</span>
-                    </div>
-                    <style>
-                    @keyframes blink {{
-                        0%, 100% {{ opacity: 1; }}
-                        50% {{ opacity: 0; }}
-                    }}
-                    .cursor {{
-                        animation: blink 1s infinite;
-                    }}
-                    .markdown-content {{
-                        line-height: 1.6;
-                    }}
-                    .markdown-content h1 {{
-                        font-size: 1.5rem;
-                        font-weight: bold;
-                        margin-top: 1rem;
-                        margin-bottom: 0.5rem;
-                        padding-bottom: 0.3rem;
-                        border-bottom: 1px solid #e1e4e8;
-                    }}
-                    .markdown-content h2 {{
-                        font-size: 1.3rem;
-                        font-weight: bold;
-                        margin-top: 1rem;
-                        margin-bottom: 0.5rem;
-                    }}
-                    .markdown-content h3 {{
-                        font-size: 1.1rem;
-                        font-weight: bold;
-                        margin-top: 1rem;
-                        margin-bottom: 0.5rem;
-                    }}
-                    .markdown-content p {{
-                        margin-bottom: 0.8rem;
-                    }}
-                    .markdown-content ul, .markdown-content ol {{
-                        margin-left: 1.5rem;
-                        margin-bottom: 1rem;
-                        padding-left: 1rem;
-                    }}
-                    .markdown-content li {{
-                        margin-bottom: 0.3rem;
-                    }}
-                    .markdown-content code {{
-                        font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-                        background-color: rgba(175, 184, 193, 0.2);
-                        padding: 0.2rem 0.4rem;
-                        border-radius: 3px;
-                        font-size: 85%;
-                    }}
-                    .markdown-content pre {{
-                        background-color: #f6f8fa;
-                        border-radius: 6px;
-                        padding: 16px;
-                        overflow: auto;
-                        font-size: 85%;
-                        line-height: 1.45;
-                        margin-bottom: 1rem;
-                    }}
-                    .markdown-content pre code {{
-                        background-color: transparent;
-                        padding: 0;
-                        margin: 0;
-                        white-space: pre;
-                        overflow-wrap: normal;
-                        border: 0;
-                    }}
-                    .markdown-content strong {{
-                        font-weight: bold;
-                    }}
-                    .markdown-content em {{
-                        font-style: italic;
-                    }}
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
-            
-            # Final display without cursor and with copy button
-            escaped_content = response.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "\\r")
-            formatted_html = process_markdown(full_response)
-            
-            placeholder.markdown(
-                f"""
-                <div class="message-container">
-                    <div class="markdown-content">
-                        {formatted_html}
-                    </div>
-                    <button class="copy-button" onclick="copyToClipboard('{escaped_content}')">
-                        📋 Copy
-                    </button>
-                </div>
-                <style>
-                .message-container {{
-                    position: relative;
-                    padding-right: 40px;
-                }}
-                .copy-button {{
-                    position: absolute;
-                    top: 5px;
-                    right: 5px;
-                    background-color: #f1f3f4;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    padding: 3px 8px;
-                    font-size: 12px;
-                    cursor: pointer;
-                    opacity: 0.7;
-                    transition: opacity 0.2s;
-                }}
-                .copy-button:hover {{
-                    opacity: 1;
-                }}
-                .markdown-content {{
-                    line-height: 1.6;
-                }}
-                .markdown-content h1 {{
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                    margin-top: 1rem;
-                    margin-bottom: 0.5rem;
-                    padding-bottom: 0.3rem;
-                    border-bottom: 1px solid #e1e4e8;
-                }}
-                .markdown-content h2 {{
-                    font-size: 1.3rem;
-                    font-weight: bold;
-                    margin-top: 1rem;
-                    margin-bottom: 0.5rem;
-                }}
-                .markdown-content h3 {{
-                    font-size: 1.1rem;
-                    font-weight: bold;
-                    margin-top: 1rem;
-                    margin-bottom: 0.5rem;
-                }}
-                .markdown-content p {{
-                    margin-bottom: 0.8rem;
-                }}
-                .markdown-content ul, .markdown-content ol {{
-                    margin-left: 1.5rem;
-                    margin-bottom: 1rem;
-                    padding-left: 1rem;
-                }}
-                .markdown-content li {{
-                    margin-bottom: 0.3rem;
-                }}
-                .markdown-content code {{
-                    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-                    background-color: rgba(175, 184, 193, 0.2);
-                    padding: 0.2rem 0.4rem;
-                    border-radius: 3px;
-                    font-size: 85%;
-                }}
-                .markdown-content pre {{
-                    background-color: #f6f8fa;
-                    border-radius: 6px;
-                    padding: 16px;
-                    overflow: auto;
-                    font-size: 85%;
-                    line-height: 1.45;
-                    margin-bottom: 1rem;
-                }}
-                .markdown-content pre code {{
-                    background-color: transparent;
-                    padding: 0;
-                    margin: 0;
-                    white-space: pre;
-                    overflow-wrap: normal;
-                    border: 0;
-                }}
-                .markdown-content strong {{
-                    font-weight: bold;
-                }}
-                .markdown-content em {{
-                    font-style: italic;
-                }}
-                </style>
-                """,
-                unsafe_allow_html=True
-            )
+            self.response_formatter.stream_response(response, placeholder)
         except Exception as e:
             print(f"Error in stream_response: {str(e)}")
             placeholder.markdown(f"Error displaying response: {str(e)}")

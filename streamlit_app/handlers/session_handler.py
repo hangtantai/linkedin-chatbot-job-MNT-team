@@ -1,22 +1,25 @@
+# import necessary library
+import os
+import sys
 from bson.objectid import ObjectId
 from pymongo.collection import Collection
 import streamlit as st
-import os
-import sys
-# Check if running on Streamlit Cloud
+from pymongo import MongoClient 
+from typing import Any
 
+# Check if running on Streamlit Cloud
 if "mnt" in os.getcwd():
     os.chdir("/mount/src/linkedin-chatbot-job-mnt-team/")
     sys.path.append("/mount/src/linkedin-chatbot-job-mnt-team/")
-from pymongo import MongoClient 
+
+# import external file
 from streamlit_app.utils.config import Config
-from typing import Any
 
 # intilize configuration
-config = Config()
+config = Config().get_config()
 
 # default title
-default_title = config.get_config()["default_name"]
+default_title = config["default_name"]
 
 class SessionHandler:
     def __init__(self, chat_collection: Collection) -> None:
@@ -102,6 +105,7 @@ class SessionHandler:
                     if st.button("Cancel", key=f"cancel_rename_{chat_id}"):
                         st.session_state.pop(f"show_rename_{chat_id}", None)
                         st.rerun()
+    
     def process_knowledge(self, session_state: Any) -> dict:
         """
         Process all previous chat messages to model

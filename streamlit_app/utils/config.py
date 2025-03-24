@@ -9,36 +9,62 @@ if "mnt" in os.getcwd():
 api_key = st.secrets["GROQ_API_KEY"]
 class Config:
     _config = {
+        # utilization
         "time_sleep": 0.02,
         "max_word": 15,
-        "model_name": "llama3-70b-8192",
-        "temperature": 0,
         "default_name": "New Chat",
-        "env_filename": ".env",
         "app_folder": "streamlit_app",
         "folder_css": "streamlit_app/static/styles.css",
         "folder_js": "streamlit_app/static/scripts.js",
         "auto_refresh": "streamlit_app/static/js/auto_refresh.js",
         "copy_handler": "streamlit_app/static/js/copy_handler.js",
+
+        # model AI
+        "env_filename": ".env",
+        "model_name": "llama3-70b-8192",
+        "temperature": 0,
         "max_tokens": 1500,
         "assistant_message_row": 3,
         "defaul_model_token": "cl100k_base",
-        "DB_config": {
-                "host": st.secrets["HOST_AIVEN"],
-                "user": st.secrets["USER_AIVEN"],
-                "password": st.secrets["PASSWORD_AIVEN"],
-                "db": st.secrets["DB_AIVEN"],
-                "port": int(st.secrets["PORT_AIVEN"]),
-                "charset": "utf8mb4",
-                # "cursorclass": pymysql.cursors.DictCursor,
-                "connect_timeout": 10,
-                "read_timeout": 10,
-                "write_timeout": 10,
-            },
-        "table_name": st.secrets["TABLE_AIVEN"],
+
+        # Database AIven
+        # "DB_config": {
+        #         "host": st.secrets["HOST_AIVEN"],
+        #         "user": st.secrets["USER_AIVEN"],
+        #         "password": st.secrets["PASSWORD_AIVEN"],
+        #         "db": st.secrets["DB_AIVEN"],
+        #         "port": int(st.secrets["PORT_AIVEN"]),
+        #         "charset": "utf8mb4",
+        #         "cursorclass": pymysql.cursors.DictCursor,
+        #         "connect_timeout": 10,
+        #         "read_timeout": 10,
+        #         "write_timeout": 10,
+        #     },
+        # "table_name": st.secrets["TABLE_AIVEN"],
+        "batch_size": 1000,
+        "db_uri": st.secrets["MONGO_URI"],
+
+        # Vector database
         "vector_db_path": "streamlit_app/db/vector_db",
         "model_name_vectordb": "sentence-transformers/all-MiniLM-L6-v2",
-        "cache_folder": "streamlit_app/models/vector_db/"
+        "cache_folder": "streamlit_app/db/vector_db/",
+        "k_document": 3,
+        "bm25_file": "bm25.pkl",
+        "weight_semantic": 0.7,
+        "algorithm_search_keyword": "bm25",
+        "dir_bm25": "vector_database/bm25.pkl",
+        "chunk_size": 1000,
+        "chunk_overlap": 100,
+        "batch_size": 32,
+        "device": "cpu",
+        "distance": "COSINE",
+        "normal_embeddings": True,
+        "s3_key": "vector_database/bm25.pkl",
+
+        # AWS service
+        "bucket_vectordb": st.secrets["S3_BUCKET_VECTORDB"],
+        "prefix_vectodb": st.secrets["PREFIX_VECTORDB"],
+        "bucket_job": st.secrets["S3_BUCKET_JOB"]
     }
 
     @classmethod
