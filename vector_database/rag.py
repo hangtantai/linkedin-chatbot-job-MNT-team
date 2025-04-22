@@ -51,12 +51,13 @@ def load_documents(df: pd.DataFrame) -> list:
         Documents includes page content and metadata
     """
     # Convert into documents
+    # Convert into documents
     documents = [
         Document(
             page_content=f'''Job Title: {row["job_title"]}
             \nCompany Name: {row["company_name"]}
             \nJob Location: {row["job_location"]}
-            \nLink to the job: {row["url"]}
+            \nUrl to detail job in Linkedin: {row["url"]}
             \nTime of the job that is posted in Linkedin: {row["job_time_posted"]}
             \nApplicants of Job that is applied: {row["job_applicants_applied"]}
             \nRole of the job: {row["job_role"]}
@@ -64,7 +65,8 @@ def load_documents(df: pd.DataFrame) -> list:
             metadata={
                 "job_title": row["job_title"],
                 "company_name": row["company_name"],
-                "job_location": row["job_location"]
+                "job_location": row["job_location"],
+                "job_url": row["url"]
             },
         )
         for _, row in df.iterrows()
@@ -231,7 +233,7 @@ def main():
     # Connect to database and fetch data
     # Read file from s3 
     s3_client = boto3.client("s3")
-    response = s3_client.get_object(Bucket=bucket_job, Key = "job_data.csv")
+    response = s3_client.get_object(Bucket=bucket_job, Key = "processed_data.csv")
     content = response["Body"].read().decode("utf-8")
 
     # convert content into Data Frame

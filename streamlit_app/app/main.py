@@ -15,6 +15,7 @@ from streamlit_app.handlers.session_handler import SessionHandler
 from streamlit_app.helpers.processing_text import escape_for_js
 from streamlit_app.handlers.style_loader_handler import StyleLoader
 from streamlit_app.helpers.check_initialization_status import check_initialization_status
+
 # Initialize configuration
 config = Config()
 config.initialize_session_states()
@@ -249,7 +250,7 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
 
                 # Stream the response
                 chat_handler.stream_response(response_content, message_placeholder)
-                
+
                 # Add assistant response to messages
                 st.session_state.messages.append({"role": "assistant", "content": response_content})
                 
@@ -261,8 +262,3 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
         except Exception as e:
             st.error(f"Error generating response: {str(e)}")
             st.session_state.messages.append({"role": "assistant", "content": f"Sorry, I encountered an error: {str(e)}"})
-
-
-# fore-rerun ?: check rerun if rerun is True -> del chat handler to restart the program
-# switching chat ?: check to skip unnecessary reinitlization and UI rendering
-# rerun ?: press button

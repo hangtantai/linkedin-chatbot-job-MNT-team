@@ -8,6 +8,8 @@ if "mnt" in os.getcwd():
 from streamlit_app.utils.config import Config
 from streamlit_app.utils.logger import logger
 from langchain.retrievers import EnsembleRetriever
+from langchain.retrievers.document_compressors import CohereRerank
+from langchain.retrievers import ContextualCompressionRetriever
 
 # Variables
 config = Config().get_config()
@@ -49,11 +51,17 @@ class RetrieverHandler:
                     bm25_retriever = pickle.load(f)
                     
                 # Create ensemble retriever (hybrid search)
-                retriever = EnsembleRetriever(
+                emsemble_retriever = EnsembleRetriever(
                     retrievers=[bm25_retriever, vector_retriever],
                     weights=[1 - weight_semantic, weight_semantic]  # Weight semantic search higher
                 )
-                logger.info(f"Hybrid retriever ({name_algo} + Vector) setup complete!")
+
+                # reranking
+                compressor = CohereRerank(top_n=5)
+                retriever = ContextualCompressionRetriever(
+                    base_compressor=compressor, base_retriever=emsemble_retriever
+                )
+                logger.info(f"Hybrid retriever ({name_algo} + Vector + Reranking) setup complete!")
             else:
                 logger.info(f"{name_algo} retriever not found. Using vector retriever only.")
         except Exception as e:

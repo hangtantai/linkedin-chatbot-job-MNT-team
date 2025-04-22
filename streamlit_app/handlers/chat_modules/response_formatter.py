@@ -10,7 +10,7 @@ if "mnt" in os.getcwd():
 
 from streamlit_app.utils.logger import logger
 from streamlit_app.utils.config import Config
-from streamlit_app.helpers.processing_text import escape_for_js
+# from streamlit_app.helpers.processing_text import escape_for_js
 
 # Variables
 config = Config().get_config()
@@ -31,6 +31,22 @@ class ResponseFormatter:
         """
         self.time_sleep = time_sleep
     
+    def escape_for_js(self, text):
+        """Escape text for safe use in JavaScript strings"""
+        if not text:
+            return ""
+        
+        # Replace newlines with JavaScript newline representation
+        text = text.replace("\n", "\\n")
+        # Replace quotes with escaped quotes
+        text = text.replace("'", "\\'")
+        text = text.replace('"', '\\"')
+        # Replace other problematic characters
+        text = text.replace("\r", "\\r")
+        text = text.replace("\t", "\\t")
+        
+        return text
+    
     def stream_response(self, response: str, placeholder: Any):
         """
         Stream the response with typing effect and proper Markdown formatting
@@ -44,233 +60,25 @@ class ResponseFormatter:
                 placeholder.markdown("No response generated.")
                 return
             
+            # Clean up any "markdown" prefix if present
+            if response.lstrip().lower().startswith("markdown"):
+                response = response.lstrip()[len("markdown"):].lstrip(": ")
+            
             full_response = ""
             # Stream by words for smoother effect
             words = response.split()
             for i, word in enumerate(words):
                 full_response += word + " "
-                time.sleep(self.time_sleep)
-                
-                # Apply markdown processing
+                # Apply markdown processing and update display
                 formatted_html = self.process_markdown(full_response)
-                
-                # Use formatted HTML with proper styling
-                placeholder.markdown(
-                    f"""
-                    <div class="markdown-content">
-                        {formatted_html}<span class="cursor">▌</span>
-                    </div>
-                    <style>
-                    @keyframes blink {{
-                        0%, 100% {{ opacity: 1; }}
-                        50% {{ opacity: 0; }}
-                    }}
-                    .cursor {{
-                        animation: blink 1s infinite;
-                    }}
-                    .markdown-content {{
-                        line-height: 1.6;
-                    }}
-                    .markdown-content h1 {{
-                        font-size: 1.5rem;
-                        font-weight: bold;
-                        margin-top: 1rem;
-                        margin-bottom: 0.5rem;
-                        padding-bottom: 0.3rem;
-                        border-bottom: 1px solid #e1e4e8;
-                    }}
-                    .markdown-content h2 {{
-                        font-size: 1.3rem;
-                        font-weight: bold;
-                        margin-top: 1rem;
-                        margin-bottom: 0.5rem;
-                    }}
-                    .markdown-content h3 {{
-                        font-size: 1.1rem;
-                        font-weight: bold;
-                        margin-top: 1rem;
-                        margin-bottom: 0.5rem;
-                    }}
-                    .markdown-content p {{
-                        margin-bottom: 0.8rem;
-                    }}
-                    .markdown-content ul {{
-                        list-style-type: disc;
-                        padding-left: 1rem;
-                        margin-top: 0.8rem;
-                        margin-bottom: 0.8rem;
-                    }}
-                    .markdown-content ul li {{
-                        display: list-item;
-                        margin-bottom: 0.8rem;
-                        padding-left: 0.5rem;
-                    }}
-                    .markdown-content ol {{
-                        list-style-type: none;
-                        counter-reset: item;
-                        padding-left: 0;
-                        margin-top: 0.8rem;
-                        margin-bottom: 0.8rem;
-                    }}
-                    .markdown-content ol li {{
-                        display: block;
-                        margin-bottom: 0.8rem;
-                        padding-left: 0.5rem;
-                    }}
-                    .markdown-content code {{
-                        font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-                        background-color: rgba(175, 184, 193, 0.2);
-                        padding: 0.2rem 0.4rem;
-                        border-radius: 3px;
-                        font-size: 85%;
-                    }}
-                    .markdown-content pre {{
-                        background-color: #f6f8fa;
-                        border-radius: 6px;
-                        padding: 16px;
-                        overflow: auto;
-                        font-size: 85%;
-                        line-height: 1.45;
-                        margin-bottom: 1rem;
-                    }}
-                    .markdown-content pre code {{
-                        background-color: transparent;
-                        padding: 0;
-                        margin: 0;
-                        white-space: pre;
-                        overflow-wrap: normal;
-                        border: 0;
-                    }}
-                    .markdown-content strong {{
-                        font-weight: bold;
-                    }}
-                    .markdown-content em {{
-                        font-style: italic;
-                    }}
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
+                placeholder.markdown(formatted_html, unsafe_allow_html=True)
+                time.sleep(self.time_sleep)
             
-            # Final display without cursor and with copy button
-            escaped_content = escape_for_js(response)
+            # Final display with complete response
             formatted_html = self.process_markdown(full_response)
+            placeholder.markdown(formatted_html, unsafe_allow_html=True)
             
-            placeholder.markdown(
-                f"""
-                <div class="message-container">
-                    <div class="markdown-content">
-                        {formatted_html}
-                    </div>
-                    <button class="copy-button" onclick="copyToClipboard('{escaped_content}')">
-                        📋 Copy
-                    </button>
-                </div>
-                <style>
-                .message-container {{
-                    position: relative;
-                    padding-right: 40px;
-                }}
-                .copy-button {{
-                    position: absolute;
-                    top: 5px;
-                    right: 5px;
-                    background-color: #f1f3f4;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    padding: 3px 8px;
-                    font-size: 12px;
-                    cursor: pointer;
-                    opacity: 0.7;
-                    transition: opacity 0.2s;
-                }}
-                .copy-button:hover {{
-                    opacity: 1;
-                }}
-                .markdown-content {{
-                    line-height: 1.6;
-                }}
-                .markdown-content h1 {{
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                    margin-top: 1rem;
-                    margin-bottom: 0.5rem;
-                    padding-bottom: 0.3rem;
-                    border-bottom: 1px solid #e1e4e8;
-                }}
-                .markdown-content h2 {{
-                    font-size: 1.3rem;
-                    font-weight: bold;
-                    margin-top: 1rem;
-                    margin-bottom: 0.5rem;
-                }}
-                .markdown-content h3 {{
-                    font-size: 1.1rem;
-                    font-weight: bold;
-                    margin-top: 1rem;
-                    margin-bottom: 0.5rem;
-                }}
-                .markdown-content p {{
-                    margin-bottom: 0.8rem;
-                }}
-                .markdown-content ul {{
-                    list-style-type: disc;
-                    padding-left: 1rem;
-                    margin-top: 0.8rem;
-                    margin-bottom: 0.8rem;
-                }}
-                .markdown-content ul li {{
-                    display: list-item;
-                    margin-bottom: 0.8rem;
-                    padding-left: 0.5rem;
-                }}
-                .markdown-content ol {{
-                    list-style-type: none;
-                    counter-reset: item;
-                    padding-left: 0;
-                    margin-top: 0.8rem;
-                    margin-bottom: 0.8rem;
-                }}
-                .markdown-content ol li {{
-                    display: block;
-                    margin-bottom: 0.8rem;
-                    padding-left: 0.5rem;
-                }}
-                .markdown-content code {{
-                    font-family: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
-                    background-color: rgba(175, 184, 193, 0.2);
-                    padding: 0.2rem 0.4rem;
-                    border-radius: 3px;
-                    font-size: 85%;
-                }}
-                .markdown-content pre {{
-                    background-color: #f6f8fa;
-                    border-radius: 6px;
-                    padding: 16px;
-                    overflow: auto;
-                    font-size: 85%;
-                    line-height: 1.45;
-                    margin-bottom: 1rem;
-                }}
-                .markdown-content pre code {{
-                    background-color: transparent;
-                    padding: 0;
-                    margin: 0;
-                    white-space: pre;
-                    overflow-wrap: normal;
-                    border: 0;
-                }}
-                .markdown-content strong {{
-                    font-weight: bold;
-                }}
-                .markdown-content em {{
-                    font-style: italic;
-                }}
-                </style>
-                """,
-                unsafe_allow_html=True
-            )
-            logger.info("Response formatted")
+            logger.info("Response formatted and displayed successfully")
         except Exception as e:
             logger.error(f"Error in stream_response: {str(e)}")
             placeholder.markdown(f"Error displaying response: {str(e)}")
@@ -424,9 +232,12 @@ class ResponseFormatter:
         text = '\n'.join(processed_lines)
         
         # Code blocks
-        text = re.sub(r'``[(\w+)?\n(.*?)](cci:1://file:///c:/Users/Hang%20Tan%20Tai/Documents/personal_space/selenium/streamlit_app/handlers/chat_handler.py:51:4-61:84)``', r'<pre><code class="language-\1">\2</code></pre>', text, flags=re.DOTALL)
+        text = re.sub(r'```(\w+)?\n(.*?)```', r'<pre><code class="language-\1">\2</code></pre>', text, flags=re.DOTALL)
+        
+        # Code blocks without language specification
+        text = re.sub(r'```\n(.*?)```', r'<pre><code>\1</code></pre>', text, flags=re.DOTALL)
         
         # Inline code
-        text = re.sub(r'[(.*?)](cci:1://file:///c:/Users/Hang%20Tan%20Tai/Documents/personal_space/selenium/streamlit_app/handlers/chat_handler.py:51:4-61:84)', r'<code>\1</code>', text)
+        text = re.sub(r'`(.*?)`', r'<code>\1</code>', text)
         
         return text

@@ -151,13 +151,19 @@ class ChatHandler:
             else:
                 logger.warning("Using standard vector retriever")
                 
-           # Create a custom prompt template that emphasizes using context
-            template = """Answer the question based only on the following context:
+            # Create a custom prompt template that emphasizes using context
+            template = """You're assistant about job dataset from Linkedin, if user ask question not in job data, just answer "I don't know
+
+            Instruction:
+            - pick one of the most meaningful information from details in this job
+            - show 5 results, each with: company_name, url, job_title, job_location, job_role
+            - show best match first, then rest
+            - if possible, let make it better format
 
             {context}
 
             Question: {question}
-            Answer: """
+            Answer:"""
 
             PROMPT = PromptTemplate(
                 template=template, 
@@ -169,7 +175,7 @@ class ChatHandler:
                 llm=self.llm,
                 chain_type="stuff",
                 retriever=self.retriever,
-                return_source_documents=True,
+                # return_source_documents=True,
                 chain_type_kwargs={"prompt": PROMPT},
                 verbose=True  # Add this to see processing details
             )
@@ -184,6 +190,7 @@ class ChatHandler:
                     for i, doc in enumerate(result["source_documents"][:2]):  # Show first 2 docs
                         preview = doc.page_content[:100] + "..." if len(doc.page_content) > 100 else doc.page_content
                         print(f"Source document {i+1}: {preview}")
+                # format_result = self.response_formatter.format_response(result["result"])
                 logger.info("QNA runs successfully")
                 return result["result"]
             except KeyError:

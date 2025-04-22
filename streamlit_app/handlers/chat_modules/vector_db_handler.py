@@ -13,6 +13,7 @@ from streamlit_app.utils.logger import logger
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
+
 config = Config().get_config()
 
 class VectorDBHandler:

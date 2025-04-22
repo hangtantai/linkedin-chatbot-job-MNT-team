@@ -3,7 +3,7 @@ class Config:
     _config = {
         "email": st.secrets["EMAIL"],
         "password": st.secrets["PASSWORD"],
-        "search_link": "https://www.linkedin.com/jobs/search/?currentJobId=4169177152&distance=25&f_E=1&geoId=104195383&keywords=data%20engineer&origin=JOB_SEARCH_PAGE_JOB_FILTER&refresh=true",
+        "search_link": "https://www.linkedin.com/jobs/search/?currentJobId=4199415386&geoId=103697962&keywords=AI%20Engineer&origin=JOB_SEARCH_PAGE_SEARCH_BUTTON&refresh=true",
         "link_file": 'output.txt',
         "detail_file": "details.txt",
         "job_data": "job_data.csv",
@@ -19,7 +19,7 @@ class Config:
         "ul_class": "ul.artdeco-pagination__pages",
         "li_class": ".//li[@data-test-pagination-page-btn]",
         "btn_class": "data-test-pagination-page-btn",
-        "li_active": ".//li[contains(@class, 'active')]"
+        "li_active": ".//li[contains(@class, 'active')]",
     }
 
     @classmethod

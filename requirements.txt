@@ -9,7 +9,6 @@ streamlit
 langchain-groq
 pymongo
 toml
-tiktoken
 langchain-core 
 langchain-groq
 langchain-huggingface
@@ -17,3 +16,6 @@ faiss-cpu
 boto3
 rank_bm25
 langchain-community
+langchain
+sentence-transformers
+langchain-cohere
