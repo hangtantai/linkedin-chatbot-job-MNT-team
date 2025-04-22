@@ -1,9 +1,10 @@
-# <img src="https://github.com/user-attachments/assets/cac75d32-c147-4c2f-bfbc-c01fc7cb12d8" width="50" height="50" bottom-padding="0"> Project Title: linkedin-chatbot-job (Tiếng việt)
+# <img src="https://github.com/user-attachments/assets/cac75d32-c147-4c2f-bfbc-c01fc7cb12d8" width="50" height="50" bottom-padding="0"> Project Title: Linkedin Chatbot Job (Tiếng việt)
 
 # 📌 Overview:
-Dự án này được phát triển bởi nhóm MNT (Math and Technology), một nhóm trẻ đam mê công nghệ và toán học từ trường Đại học Khoa học Tự nhiên (University of Science), đại học Quốc Gia Thành phố Hồ Chí Minh, với mong muốn tìm hiểu và ứng dụng các công cụ AI. Đây là một dự án nhỏ nhưng có mục tiêu rõ ràng: nghiên cứu, triển khai một AI với data từ Linkedin để phục vụ cho mọi người có thể search về detail job và nhờ AI chuẩn bị giúp về roadmap, techniques hay đơn giản là so sánh giữa các job với nhau. Chúng tôi mong muốn tạo ra một nền tảng có tính thực tiễn cao, đồng thời học hỏi và chia sẻ kiến thức với tất cả mọi người. 
+Dự án này được phát triển bởi nhóm MNT (Math and Technology), một nhóm trẻ với đam mê công nghệ và toán học từ trường Đại học Khoa học Tự nhiên (University of Science), đại học Quốc Gia Thành phố Hồ Chí Minh, với mong muốn tìm hiểu và ứng dụng các công cụ AI. Đây là một dự án nhỏ nhưng có mục tiêu rõ ràng: nghiên cứu, triển khai một AI với data từ Linkedin để phục vụ cho mọi người có thể search về chi tiết job và nhờ AI chuẩn bị giúp về yêu cầu, kỹ năng mềm,... hay đơn giản là so sánh giữa các job với nhau. Chúng tôi mong muốn tạo ra một nền tảng có tính thực tiễn cao, đồng thời học hỏi và chia sẻ kiến thức với tất cả mọi người. 
 
-**Lưu ý: Vì đây là 1 dự án phi lợi nhuận nên các công cụ đều là free-plan, chủ yếu nhắm vào kỹ thuật, code chứ không hoàn toàn tăng performance của website hay độ thông minh của AI cao như xài các model trả phí, mong được mọi người thông cảm.**
+**Lưu ý 1: Vì đây là 1 dự án phi lợi nhuận nên các công cụ đều là free-plan, chủ yếu nhắm vào kỹ thuật được nghiên cứu và sử dụng trong kiến trúc, có thể sẽ có 1 vài vấn đề với câu trả lời không bằng như xài các model trả phí, mong được mọi người thông cảm.** \
+**Lưu ý 2: Bởi vì tạo 1 tài khoản để chat thì tụi mình chưa có kinh nghiệm và việc quản lý chat để tránh bị mất token hay đầy bộ nhớ nên tụi mình sẽ đóng lại và chỉ show code và demo, sau này tụi mình sẽ phát triển trên Kubernetes để tạo 1 web/app cho mọi người sử dụng**
 
 # 🌟 Features: 
 ## 1. Web Scrapping:
@@ -11,7 +12,15 @@ Lấy tất cả thông tin từ job liên quan về từ khóa: tất cả các
 - Automation ETL với selenium để lấy toàn bộ thông tin về job.
 - Sử dụng airflow để tự động quá trình này.
 
-## 2. AI chatbot:
+## 2. Xây dựng RAG pipeline:
+Trước khi đóng gói tất cả các vector database thành file pkl thì chúng ta sẽ xử lý các bước như:
+- Tạo Document
+- Split Document cho việc dễ xử lý
+- Khởi tạo Retriever và fit vào Document
+- Lưu thành file pkl và load lên S3 để lưu lại
+- Khi Chatbot khởi tạo retriever thì sẽ download về và sử dụng
+
+## 3. AI chatbot:
 Dự án có các chức năng cơ bản như:
 - Tạo new chat.
 - Xóa chat.
@@ -22,7 +31,7 @@ Dự án có các chức năng cơ bản như:
 Video demo:
 Updated later
 
-Link trải nghiệm: https://linkedin-chatbot-job-mnt-team.streamlit.app/
+Link trải nghiệm: https://linkedin-chatbot-job-mnt-team.streamlit.app/ (Vì streamlit sẽ đóng các ứng dụng nặng nên tụi mình sẽ đóng lại)
 
 # 🛠️ Installation:
 ## Clone project
