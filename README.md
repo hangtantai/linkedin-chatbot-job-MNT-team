@@ -183,13 +183,13 @@ streamlit run streamlit_app/app/main.py
 
 
 ## Vector Database
-![Vector Database Architecture](images/vectordb.png)
+![Vector Database Architecture](images/vector_database.png)
 
 ## App
 ![App Architecture](images/app.png)
 
 ## Flow AI
-![AI Flow](images/flow-ai.png)
+![AI Flow](images/flow_ai.png)
 
 # 📊 Database Core:
 ## Database Schema:

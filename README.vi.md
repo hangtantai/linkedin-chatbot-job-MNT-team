@@ -178,18 +178,18 @@ streamlit run streamlit_app/app/main.py
 ```
 
 # 🏗️ Architecture for this project:
-## Web Scrapping
-![Alt text](images/web_scrapping.png)
+## Web Scraping
+![Web Scraping Architecture](images/web_scrapping.png)
 
 
 ## Vector Database
-![Alt text](images/vectordb.png)
+![Vector Database Architecture](images/vector_database.png)
 
 ## App
-![Alt text](images/app.png)
+![App Architecture](images/app.png)
 
 ## Flow AI
-![Alt text](images/flow-ai.png)
+![AI Flow](images/flow_ai.png)
 
 # 📊 Database Core:
 ## Database Schema:
