@@ -1,37 +1,94 @@
-# <img src="https://github.com/user-attachments/assets/cac75d32-c147-4c2f-bfbc-c01fc7cb12d8" width="50" height="50" bottom-padding="0"> Project Title: Linkedin Chatbot Job (Tiếng việt)
+# <img src="https://github.com/user-attachments/assets/cac75d32-c147-4c2f-bfbc-c01fc7cb12d8" width="50" height="50" bottom-padding="0"> Project Title: Linkedin Chatbot Job
 
-# 📌 Overview:
-Dự án này được phát triển bởi nhóm MNT (Math and Technology), một nhóm trẻ với đam mê công nghệ và toán học từ trường Đại học Khoa học Tự nhiên (University of Science), đại học Quốc Gia Thành phố Hồ Chí Minh, với mong muốn tìm hiểu và ứng dụng các công cụ AI. Đây là một dự án nhỏ nhưng có mục tiêu rõ ràng: nghiên cứu, triển khai một AI với data từ Linkedin để phục vụ cho mọi người có thể search về chi tiết job và nhờ AI chuẩn bị giúp về yêu cầu, kỹ năng mềm,... hay đơn giản là so sánh giữa các job với nhau. Chúng tôi mong muốn tạo ra một nền tảng có tính thực tiễn cao, đồng thời học hỏi và chia sẻ kiến thức với tất cả mọi người. 
+<p align="center">
+  <a href="README.md">English</a> |
+  <a href="README.vi.md">Tiếng Việt</a>
+</p>
 
-**Lưu ý 1: Vì đây là 1 dự án phi lợi nhuận nên các công cụ đều là free-plan, chủ yếu nhắm vào kỹ thuật được nghiên cứu và sử dụng trong kiến trúc, có thể sẽ có 1 vài vấn đề với câu trả lời không bằng như xài các model trả phí, mong được mọi người thông cảm.** \
-**Lưu ý 2: Bởi vì tạo 1 tài khoản để chat thì tụi mình chưa có kinh nghiệm và việc quản lý chat để tránh bị mất token hay đầy bộ nhớ nên tụi mình sẽ đóng lại và chỉ show code và demo, sau này tụi mình sẽ phát triển trên Kubernetes để tạo 1 web/app cho mọi người sử dụng**
+<a id="english"></a>
+# 📌 Overview [English]:
+This project was developed by the MNT team (Math and Technology), a young group passionate about technology and mathematics from the University of Science, Vietnam National University Ho Chi Minh City. We aim to explore and apply AI tools in practical contexts. Although small in scale, this project has a clear objective: to research and implement an AI system using LinkedIn data to help users search for job details and get AI assistance with requirements, soft skills, or simply compare different job opportunities. We strive to create a highly practical platform while learning and sharing knowledge with everyone.
+
+**Note 1: As this is a non-profit project, we use free-plan tools focused on the techniques researched and used in the architecture. This may result in some response quality issues compared to paid models. We appreciate your understanding.**
+
+**Note 2: Due to our limited experience with user account management and to avoid token loss or memory overflow, we will temporarily close the service and only showcase code and demos. In the future, we plan to develop the application on Kubernetes to create a web/app for everyone to use.**
+
+**Note 3: Knowledge that we used in here [document](/document/)**
+
+# 📁 Project Structure
+```linkedin-chatbot-job-MNT-team/
+├── .devcontainer/             # Development container configuration
+├── .streamlit/                # Streamlit configuration with secrets.toml
+├── document/                  # Project documentation
+├── images/                    # Images for README and documentation
+├── streamlit_app/             # Main application code
+│   ├── app/                   # Streamlit application core
+│   ├── db/                    # Database handlers
+│   │   └── vector_db/         # Vector database files
+│   ├── handlers/              # Request handlers
+│   │   └── chat_modules/      # Chat functionality modules
+│   ├── helpers/               # Helper functions
+│   ├── static/                # Static assets
+│   └── utils/                 # Utility functions
+│       └── logs/              # Application logs
+├── vector_database/           # RAG pipeline implementation
+└── web_scrapping/             # LinkedIn data scraping module
+    ├── chromedriver-win64/    # Chrome webdriver
+    ├── commands/              # Command pattern implementations
+    ├── db/                    # Database interactions
+    ├── downloaded_files/      # Downloaded job data
+    ├── driver/                # Selenium driver wrappers
+    ├── factories/             # Factory pattern implementations
+    ├── helpers/               # Helper utilities 
+    ├── repository/            # Data access layer
+    ├── strategies/            # Strategy pattern implementations
+    └── utils/                 # Utility functions
+        └── logs/              # Scraping logs
+```
 
 # 🌟 Features: 
-## 1. Web Scrapping:
-Lấy tất cả thông tin từ job liên quan về từ khóa: tất cả các keyword về công nghệ (Computer Science and Technology).
-- Automation ETL với selenium để lấy toàn bộ thông tin về job.
-- Sử dụng airflow để tự động quá trình này.
+## 1. Web Scraping:
+Collects all information from jobs related to keywords in Computer Science and Technology.
+- Automated ETL with Selenium to extract comprehensive job information
+- Uses Airflow to automate this process
 
-## 2. Xây dựng RAG pipeline:
-Trước khi đóng gói tất cả các vector database thành file pkl thì chúng ta sẽ xử lý các bước như:
-- Tạo Document
-- Split Document cho việc dễ xử lý
-- Khởi tạo Retriever và fit vào Document
-- Lưu thành file pkl và load lên S3 để lưu lại
-- Khi Chatbot khởi tạo retriever thì sẽ download về và sử dụng
+## 2. RAG Pipeline Construction:
+Before packaging all vector databases into PKL files, we process the following steps:
+- Document creation
+- Document splitting for easier processing
+- Retriever initialization and fitting to Documents
+- Saving to PKL files and uploading to S3 for storage
+- When the Chatbot initializes the retriever, it downloads and uses these files
 
-## 3. AI chatbot:
-Dự án có các chức năng cơ bản như:
-- Tạo new chat.
-- Xóa chat.
-- Chat về job mới nhất trên linkedin, search theo keyword, so sánh benefit, roadmap cho từng nghành nghề, techniques cần chuẩn bị.
-- Xem lịch sử chat (không phát triển phần này vì nhóm chúng mình không có role chuyên về frontend và backend nên việc tạo 1 account là rất khó khăn nên **hệ thống sẽ tự động xóa chat kể từ 3 ngày cho lần chat đầu tiên**)
+## 3. AI Chatbot:
+The project offers basic functions such as:
+- Creating new chats
+- Deleting chats
+- Chatting about the latest LinkedIn jobs, searching by keyword, comparing benefits, career roadmaps for different industries, and preparation techniques
+- Viewing chat history 
 
-# 🎥 Demo website:
-Video demo:
-Updated later
+# 🎥 Demo Website:
+Image Demo:
 
-Link trải nghiệm: https://linkedin-chatbot-job-mnt-team.streamlit.app/ (Vì streamlit sẽ đóng các ứng dụng nặng nên tụi mình sẽ đóng lại)
+Interface
+![Interface](images/interface.png)
+
+When everything load successfully
+![Load](images/load.png)
+
+Chat interface
+![Chat](images/chat.png)
+
+Prompt Sample 1: English
+![Sample 1](images/sample1.png)
+
+Prompt Sample 2: English
+![Sample 2](images/sample2.png)
+
+Prompt Sample 3: VIetnamese
+![Sample 1](images/sample3.png)
+
+Experience link: https://linkedin-chatbot-job-mnt-team.streamlit.app/ (As Streamlit closes resource-intensive applications, we will eventually close this service)
 
 # 🛠️ Installation:
 ## Clone project
@@ -39,16 +96,16 @@ Link trải nghiệm: https://linkedin-chatbot-job-mnt-team.streamlit.app/ (Vì 
 git clone <link to github project>
 ```
 
-## Installation necessary package
+## Installation necessary packages
 ```python
-pip install -r requiremnents
+pip install -r requirements.txt
 ```
 
 # Set up environment
-## Create a folder .streamlit (recommend)
-Sau đó bạn hãy tạo 1 file secrets.toml, bạn cần tạo các API sau
+## Create a folder .streamlit (recommended)
+Create a secrets.toml file with the following API keys:
 
-### WebScrapping: Linkedin
+### WebScrapping: LinkedIn
 EMAIL="your_username"
 PASSWORD="your_password"
 
@@ -58,7 +115,7 @@ GROQ_API_KEY="your_api"
 ### APP: MONGO_URI: Memory chat
 MONGO_URI="your_api"
 
-### APP: AIVEN: Database (phía dưới có hướng dẫn cách tạo và quick connect, phần database)
+### APP: AIVEN: Database (see instructions for creation and quick connect in the database section below)
 HOST_AIVEN="your_api" \
 USER_AIVEN="your_api" \
 PASSWORD_AIVEN="your_api" \
@@ -66,7 +123,7 @@ DB_AIVEN="your_api"\
 PORT_AIVEN="your_api"\
 TABLE_AIVEN="your_api"
 
-### APP: AWS S3: Saving object data (phía dưới phần database có hướng dẫn)
+### APP: AWS S3: Saving object data (see instructions below in the database section)
 S3_BUCKET_JOB="your_api"\
 S3_BUCKET_LOG="your_api"\
 S3_BUCKET_VECTORDB="your_api"\
@@ -74,17 +131,22 @@ PREFIX_VECTORDB="your_api"\
 AWS_ACCESS_KEY_ID="your_api"\
 AWS_SECRET_ACCESS_KEY="your_api"
 
-## Create a file .env (not recommend)
-Bạn vẫn tạo 1 file và điền các thông tin như trên nhưng cần phải chỉnh khá nhiều, vì tụi mình build trên streamlit nên tụi mình xài .streamlit secrets luôn thay vì environment như các dự án thông thường.
+### APP: COHERE: ranking function
+COHERE_API_KEY="your_api"\
+
+## Create a file .env (not recommended)
+You can create a file with the same information as above, but it requires more adjustments. Since we built on Streamlit, we use .streamlit secrets instead of environment variables as in typical projects.
 
 # ⚙️ Usage:
+
 
 ## Run command to set up project
 ```bash
 pip install -e .
 ```
 
-## Web Scrapping: 
+## Web Scraping: 
+because LinkedIn applied Capcha protection, it has many challenge for my scrapping system, so we have to stop developing it.
 ```bash
 cd "<current_path>/linkedin-chatbot-job-MNT-team/web_scrapping"
 python main.py
@@ -93,8 +155,14 @@ or
 ```bash
 python "<current_path>/linkedin-chatbot-job-MNT-team/web_scrapping/main.py"
 ```
+
+## Without Web Scraping: because we have scrapped, you can use it 
+- You can find it into folder: /web_scrapping/processed_data.csv, it contains ~ 300 data sample job, it is scraped from Linkedin (last scraped: 23/4/2025)
+- You need push into S3, We have load_data.py, this file is to load data S3, if you need to push it into S3
+
 ## AI chatbot:
-**Chạy Vectordatabase (Manual)**
+**Run Vectordatabase**
+Run and create retriever
 ```bash
 cd "<current_path>/linkedin-chatbot-job-MNT-team/vector_database"
 python rag.py
@@ -104,59 +172,71 @@ or
 python "<current_path>/linkedin-chatbot-job-MNT-team/vector_database/rag.py"
 ```
 
-**Chạy app**
+**Run app**
 ```bash
 streamlit run streamlit_app/app/main.py
 ```
 
 # 🏗️ Architecture for this project:
-## Web Scrapping
-![Alt text](images/web_scrapping.png)
+## Web Scraping
+![Web Scraping Architecture](images/web_scrapping.png)
 
 
 ## Vector Database
-![Alt text](images/vectordb.png)
+![Vector Database Architecture](images/vectordb.png)
 
 ## App
-![Alt text](images/app.png)
+![App Architecture](images/app.png)
 
 ## Flow AI
-![Alt text](images/flow-ai.png)
+![AI Flow](images/flow-ai.png)
 
 # 📊 Database Core:
 ## Database Schema:
-![Alt text](images/database.png)
+![Database Schema](images/database.png)
 
 ## Connect to Aiven:
-Chúng tôi sử dụng Aiven platform, DBMS sử dụng là MySQL, với cấu hình là:
+We use the Aiven platform with MySQL as our DBMS, configured with:
 - 1 CPU
 - 1 GB RAM (processing)
 - 5 GB Storage
 
-là bản free-plan hỗ trợ cho các dự án phi lợi nhuận, tham khảo tại đây: https://console.aiven.io/
-- Nếu bạn tự tạo database, thì bạn có thể vào service của bạn và nhấn vào quick connnect và chọn python.
-- Còn nều bạn không phải owner, thì aiven có feature là add user vào.
-- Aiven hiện tại không có feature view table trên chính nền tảng của họ, nên chỉ có thể sử dụng code với các command để check.
+This is a free-plan supporting non-profit projects. Visit: https://console.aiven.io/
+- If you create your own database, access your service, click on quick connect, and select Python.
+- If you're not the owner, Aiven allows user addition.
+- Aiven currently doesn't feature table viewing on their platform, so you can only check using code commands.
 
 ## Database for Memory Chat:
-Chúng tôi sử dụng Mongo Atlas, là phiên bản mongodb nhưng trên cloud hỗ trợ rất nhiều cho developer phát triển.
-Một số lưu ý khi bạn sử dụng mongo atlas:
-- Nếu muốn connect thì bạn cần URI, và mongo atlas bảo mật rất tốt nên chỉ có thể sử dụng connection (0.0.0.0, tức là cho phép mọi địa chỉ IP truy cập vào), thông thường sẽ bị chặn toàn bộ IP, trừ IP local của bạn.
-- Nên xem kĩ các dung lượng lưu trữ của Mongo atlas, vì free-plan nên giới hạn cũng khá nhiều, bạn không thể sử dụng VPC hay các cách kết nối nâng cao khác ngoài 0.0.0.0, nếu xài free-plan.
+We use MongoDB Atlas, a cloud version of MongoDB with extensive developer support.
+Note when using MongoDB Atlas:
+- To connect, you need a URI. MongoDB Atlas has strong security, so you can only use connections that allow all IP addresses (0.0.0.0). Typically, all IPs are blocked except your local IP.
+- Carefully check MongoDB Atlas storage limits. The free plan has many restrictions, and you can't use VPC or advanced connection methods other than 0.0.0.0.
 
 ## AWS S3
-Kết nối vào S3, thì các bạn cần đăng nhập và lấy được các thông tin sau:
-- Vào IAM
-- Tạo access keys
-- Tạo xong thì copy 2 phần là: AWS Access key ID và AWS secret access key
-- S3 thì bạn cần tạo thêm bucket trong s3, nếu bạn cần tạo folder ví dụ FAISS, thì phải có folder riêng với BM25, nên sẽ có 1 prefix là vector_database/faiss
-- 
+To connect to S3:
+- Go to IAM
+- Create access keys
+- Copy both: AWS Access Key ID and AWS Secret Access Key
+- Create buckets in S3. If you need folders like FAISS, create separate folders for different purposes (e.g., vector_database/faiss)
+
+# 🔧 Technologies Used:
+- **Selenium**: Web automation for data extraction
+- **Apache Airflow**: ETL workflow orchestration
+- **LangChain**: Framework for building RAG pipelines
+- **FAISS/BM25/Cohere**: Vector databases for similarity search
+- **AWS S3**: Storage for data and models
+- **MongoDB Atlas**: Chat history storage
+- **MySQL (Aiven)**: Relational database
+- **Streamlit**: Web application framework
+- **GROQ**: LLM provider
+- **Python/JavaScript/CSS/SQL**: Core programming language
+
 # 🤝 Contributing:
-Leader: Hàng Tấn Tài (US)
+Leader: Hang Tan Tai (US)
 
-Member: Nguyễn Hoàng Nam (US)
+Member: Nguyen Hoang Nam (US)
 
-Member: Hồ Quốc Tuấn (US)
+Member: Ho Quoc Tuan (US)
 
 # 📝 License:
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)  
